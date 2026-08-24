@@ -1,0 +1,208 @@
+% =====================================================================
+%  PREÁMBULO
+% 
+% Adiciones y modificaciones a 'ucmthesis.cls'
+% =====================================================================
+
+% ----------------------- Codificación e idioma ----------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{} % fuente Latin Modern (si está disponible)
+\usepackage[spanish,es-noshorthands]{babel}
+\addto\captionsspanish{%
+  \renewcommand{\contentsname}{Tabla de contenidos}%
+  }
+
+% ----------------------- Matemáticas ---------------------------------
+\usepackage{amsmath,amssymb,amsthm}
+
+% ----------------------- Gráficos y tablas ---------------------------
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+% ----------------------- Código Lean (listings) ----------------------
+\usepackage{listings}
+
+\usepackage[strings]{underscore}
+
+\definecolor{leankw}{RGB}{0,90,180}       
+\definecolor{leantactic}{RGB}{130,30,120} 
+\definecolor{leancomment}{RGB}{110,110,110}
+\definecolor{leanbg}{RGB}{247,247,250}
+\definecolor{leanframe}{RGB}{200,200,210}
+
+\lstdefinelanguage{lean}{
+  keywords={import, inductive, structure, where, def, theorem, example,
+            local, infixr, infixl, prefix, variable, extends, fun, match,
+            by, with, deriving, open, namespace, end, noncomputable},
+  keywords=[2]{intro, intros, exact, apply, have, constructor, rfl,
+            by_contra, by_cases, contradiction, rcases, rintro, obtain,
+            refine, induction, subst, simp, generalizing, at, cases,
+            absurd, trivial, assumption},
+  sensitive=true,
+  comment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  literate=
+    {→}{{$\to$}}1               {↔}{{$\leftrightarrow$}}1
+    {⟶}{{$\longrightarrow$}}2  {⟷}{{$\longleftrightarrow$}}2
+    {⟹}{{$\Longrightarrow$}}2  {⟸}{{$\Longleftarrow$}}2
+    {∼}{{$\sim$}}1              {¬}{{$\lnot$}}1
+    {⋏}{{$\curlywedge$}}1       {⋎}{{$\curlyvee$}}1
+    {∧}{{$\land$}}1             {∨}{{$\lor$}}1
+    {□}{{$\square$}}1           {◇}{{$\lozenge$}}1
+    {⊥}{{$\bot$}}1              {⊤}{{$\top$}}1
+    {⊢}{{$\vdash$}}1            {⊬}{{$\nvdash$}}1
+    {⊨}{{$\vDash$}}1
+    {∈}{{$\in$}}1               {∉}{{$\notin$}}1
+    {⊆}{{$\subseteq$}}1         {∪}{{$\cup$}}1
+    {⋃}{{$\bigcup$}}1           {∅}{{$\varnothing$}}1
+    {∀}{{$\forall$}}1           {∃}{{$\exists$}}1
+    {⟨}{{$\langle$}}1            {⟩}{{$\rangle$}}1
+    {·}{{$\cdot$}}1
+    {φ}{{$\varphi$}}1           {ψ}{{$\psi$}}1
+    {χ}{{$\chi$}}1              {ξ}{{$\xi$}}1
+    {Γ}{{$\Gamma$}}1            {Δ}{{$\Delta$}}1
+    {Θ}{{$\Theta$}}1
+    {α}{{$\alpha$}}1              {β}{{$\beta$}}1
+    {₀}{{${}_0$}}1              {₁}{{${}_1$}}1
+    {₂}{{${}_2$}}1              {ₙ}{{${}_n$}}1
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'{\i}}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {ñ}{{\~n}}1 {ü}{{\"u}}1
+    {Á}{{\'A}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1,
+}
+
+\lstset{
+  language=lean,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{leankw}\bfseries,
+  keywordstyle=[2]\color{leantactic},
+  commentstyle=\color{leancomment}\itshape,
+  backgroundcolor=\color{leanbg},
+  frame=single,
+  rulecolor=\color{leanframe},
+  framesep=5pt,
+  xleftmargin=8pt, xrightmargin=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=fullflexible,
+  keepspaces=true,
+  aboveskip=0.9em, belowskip=0.9em,
+    numbers=left,
+  numberstyle=\tiny\color{leancomment},
+  numbersep=8pt,
+  firstnumber=1,
+}
+
+% --- Símbolos Unicode utilizables en modo texto (para \lean y la prosa) ---
+\DeclareUnicodeCharacter{2192}{\ensuremath{\to}}
+\DeclareUnicodeCharacter{2194}{\ensuremath{\leftrightarrow}}
+\DeclareUnicodeCharacter{27F6}{\ensuremath{\longrightarrow}}
+\DeclareUnicodeCharacter{27F7}{\ensuremath{\longleftrightarrow}}
+\DeclareUnicodeCharacter{27F9}{\ensuremath{\Longrightarrow}}
+\DeclareUnicodeCharacter{27F8}{\ensuremath{\Longleftarrow}}
+\DeclareUnicodeCharacter{223C}{\ensuremath{\sim}}
+\DeclareUnicodeCharacter{00AC}{\ensuremath{\lnot}}
+\DeclareUnicodeCharacter{22CF}{\ensuremath{\curlywedge}}
+\DeclareUnicodeCharacter{22CE}{\ensuremath{\curlyvee}}
+\DeclareUnicodeCharacter{2227}{\ensuremath{\land}}
+\DeclareUnicodeCharacter{2228}{\ensuremath{\lor}}
+\DeclareUnicodeCharacter{25A1}{\ensuremath{\square}}
+\DeclareUnicodeCharacter{25C7}{\ensuremath{\lozenge}}
+\DeclareUnicodeCharacter{22A5}{\ensuremath{\bot}}
+\DeclareUnicodeCharacter{22A4}{\ensuremath{\top}}
+\DeclareUnicodeCharacter{22A2}{\ensuremath{\vdash}}
+\DeclareUnicodeCharacter{22AC}{\ensuremath{\nvdash}}
+\DeclareUnicodeCharacter{22A8}{\ensuremath{\vDash}}
+\DeclareUnicodeCharacter{2208}{\ensuremath{\in}}
+\DeclareUnicodeCharacter{2209}{\ensuremath{\notin}}
+\DeclareUnicodeCharacter{2286}{\ensuremath{\subseteq}}
+\DeclareUnicodeCharacter{222A}{\ensuremath{\cup}}
+\DeclareUnicodeCharacter{22C3}{\ensuremath{\bigcup}}
+\DeclareUnicodeCharacter{2205}{\ensuremath{\varnothing}}
+\DeclareUnicodeCharacter{2200}{\ensuremath{\forall}}
+\DeclareUnicodeCharacter{2203}{\ensuremath{\exists}}
+\DeclareUnicodeCharacter{27E8}{\ensuremath{\langle}}
+\DeclareUnicodeCharacter{27E9}{\ensuremath{\rangle}}
+\DeclareUnicodeCharacter{00B7}{\ensuremath{\cdot}}
+\DeclareUnicodeCharacter{03C6}{\ensuremath{\varphi}}
+\DeclareUnicodeCharacter{03C8}{\ensuremath{\psi}}
+\DeclareUnicodeCharacter{03C7}{\ensuremath{\chi}}
+\DeclareUnicodeCharacter{03BE}{\ensuremath{\xi}}
+\DeclareUnicodeCharacter{0393}{\ensuremath{\Gamma}}
+\DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
+\DeclareUnicodeCharacter{0398}{\ensuremath{\Theta}}
+\DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha}}
+\DeclareUnicodeCharacter{03B2}{\ensuremath{\beta}}
+\DeclareUnicodeCharacter{2080}{\ensuremath{{}_0}}
+\DeclareUnicodeCharacter{2081}{\ensuremath{{}_1}}
+\DeclareUnicodeCharacter{2082}{\ensuremath{{}_2}}
+\DeclareUnicodeCharacter{2099}{\ensuremath{{}_n}}
+
+% Código Lean en línea: \lean{...}
+\newcommand{\lean}[1]{\texttt{\small #1}}
+
+% ----------------------- Hipervínculos -------------------------------
+\usepackage[colorlinks=true, linkcolor=black, citecolor=black,
+            urlcolor=blue!60!black,
+            bookmarksnumbered=true,
+            pdftitle={Lógica modal en Lean},
+            pdfauthor={Jorge Martinena Cepa}]{hyperref}
+
+% ----------------------- Entornos de teoremas ------------------------
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}[chapter]
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{proposicion}[teorema]{Proposición}
+\newtheorem{corolario}[teorema]{Corolario}
+
+\theoremstyle{definition}
+\newtheorem{definicion}[teorema]{Definición}
+\newtheorem{ejemplo}[teorema]{Ejemplo}
+
+\theoremstyle{remark}
+\newtheorem{observacion}[teorema]{Observación}
+
+% ----------------------- Macros de lógica modal ----------------------
+\newcommand{\nec}{\square}          % operador de necesidad
+\newcommand{\pos}{\lozenge}         % operador de posibilidad
+\newcommand{\limp}{\to}             % implicación (objeto)
+\newcommand{\proves}{\vdash}        % demostrabilidad
+\newcommand{\sat}{\vDash}           % satisfacción M,w |=
+\newcommand{\K}{\mathbf{K}}         % el sistema K
+
+% ----------------------- Corrección manual de la portada --------------
+\makeatletter
+\renewcommand{\maketitle}{%
+\begin{alwayssingle}
+    \renewcommand{\footnotesize}{\small}
+    \renewcommand{\footnoterule}{\relax}
+    \thispagestyle{empty}
+  \null\vfill
+  \begin{center}
+  {\noindent\rule{15cm}{1.5pt}\par}
+  \vspace*{2.4mm}
+    { \Huge {\bfseries {\@title}} \par}
+  \vspace*{3.6mm}
+  {\noindent\rule{15cm}{1.5pt}\par}
+{\large \vspace*{18mm} {\logo \par} \vspace*{22.5mm}}
+    {{\Large \@author} \par}
+{\large \vspace*{1ex}
+    {{\@college} \par}
+\vspace*{1ex}
+    {Universidad Complutense de Madrid \par}
+\vspace*{25mm}
+    {{\submittedtext} \par}
+\vspace*{1ex}
+    {\it {\@degree} \par}
+\vspace*{2ex}
+    {\@degreedate}}
+  \end{center}
+  \null\vfill
+\end{alwayssingle}}
+\makeatother
+

@@ -1,0 +1,25 @@
+# Ficheros auxiliares de LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Ficheros temporales de latexdiff
+*-diff*.tex
+diff.tex
+
+# Compilación de Lean
+.lake/
+build/
+
+# Windows
+Thumbs.db

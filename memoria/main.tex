@@ -1,0 +1,47 @@
+% =====================================================================
+%  MEMORIA
+% =====================================================================
+
+\documentclass[12pt]{ucmthesis}
+
+\input{preambulo}
+
+% ---------------------- Datos de la portada --------------------------
+\title{{\huge AAAFormalización de la lógica modal $\K$\\en Lean: sintáxis, semántica de Kripke\\y adecuación\par}}
+\author{Jorge Martinena Cepa}
+\college{Facultad de Ciencias Matemáticas}
+\degree{Grado en Matemáticas\\ (Especialización en Ciencias de la Computación)}
+\degreedate{Septiembre de 2026\\[3ex]
+% La portada de la plantilla no contempla a los tutores. Se añaden aquí.
+{\small Dirigido por Ignacio Fábregas y Óscar Martín}}
+
+\begin{document}
+
+
+% ------------------------- Portada ---------------------------------
+\maketitle
+
+% AAA
+\baselineskip=18pt plus1pt
+
+% -------------- Páginas preliminares (numeración romana) ------------
+\begin{romanpages}
+  \include{capitulos/00-resumen}
+  \tableofcontents
+\end{romanpages}
+
+% ------------------------- Capítulos --------------------------------
+\include{capitulos/01-introduccion}
+\include{capitulos/02-lean}
+\include{capitulos/03-logica-modal}
+\include{capitulos/04-formalizacion}
+\include{capitulos/05-muddy-children}
+\include{capitulos/06-conclusiones}
+
+% ------------------------- Bibliografía -----------------------------
+\cleardoublepage
+\addcontentsline{toc}{chapter}{Bibliografía}
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
+
+\end{document}
