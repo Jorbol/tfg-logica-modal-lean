@@ -26,9 +26,7 @@ miles que forman el resto de la herramienta.
 
 Los primeros sistemas de este tipo, como Automath (1967) y Mizar (1973),
 demostraron que la idea era viable. Hoy los asistentes más usados en
-matemáticas son Rocq, Isabelle/HOL y Lean. Lean \cite{lean4}, desarrollado inicialmente por Leonardo de Moura en Microsoft Research y mantenido actualmente por la Lean Focused Research Organisation, es a la vez un asistente de demostración y un lenguaje de programación funcional. En este trabajo usamos su cuarta versión, Lean~4, junto con su biblioteca matemática Mathlib \cite{mathlib}, un proyecto comunitario que reúne, verificadas, buena parte de las matemáticas de grado y posgrado. De Mathlib no
-importaremos resultados de lógica modal (el objetivo es construirla
-nosotros), pero sí su infraestructura básica: la teoría elemental de
+matemáticas son Rocq, Isabelle/HOL y Lean. Lean \cite{lean4}, desarrollado inicialmente por Leonardo de Moura en Microsoft Research y mantenido actualmente por la Lean Focused Research Organisation, es a la vez un asistente de demostración y un lenguaje de programación funcional. En este trabajo usamos su cuarta versión, Lean~4, junto con su biblioteca matemática Mathlib \cite{mathlib}, un proyecto comunitario que reúne, verificadas, buena parte de las matemáticas de grado y posgrado. De Mathlib solo importaremos su infraestructura básica: la teoría elemental de
 conjuntos, el modo táctico y, en un punto crucial, el lema de Zorn.
 
 En la práctica, trabajar con Lean se parece a mantener un diálogo. El
@@ -360,7 +358,7 @@ meta el consecuente; \lean{intro hq} hace lo propio con la segunda
 implicación. La meta es entonces $p$, que es exactamente la hipótesis
 \lean{hp}, y \lean{exact hp} la señala y cierra el objetivo. Estas dos
 tácticas, junto con el resto de las empleadas en el trabajo, se detallan en
-la sección \ref{sec:tacticas}. 
+la sección \ref{sec:tacticas}.
 
 Merece la pena subrayar la relación entre los dos modos: las tácticas no son
 una lógica aparte, sino un lenguaje de órdenes para construir el mismo

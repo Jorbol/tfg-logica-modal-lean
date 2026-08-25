@@ -3,125 +3,59 @@
 % =====================================================================
 \chapter{Introducción}
 
-\underline{Sobre Lean}
+\section{Motivación}
 
-Una demostración matemática es, en principio, un objeto completamente
-preciso: una cadena de pasos en la que cada afirmación se sigue de las
-anteriores mediante reglas aceptadas. En la práctica, sin embargo, las
-demostraciones que escribimos y leemos están llenas de atajos: pasos
-``evidentes'' que se omiten, casos ``análogos'' que no se comprueban o
-notación que se sobreentiende. En general, este nivel de detalle es el
-adecuado para hacer matemáticas entre personas, pero deja abierta una pregunta
-incómoda respecto de la formalización pura: ¿cómo sabemos que no se nos ha escapado nada?
+Este trabajo se presenta como la combinación de dos intereses muy ligados a las matemáticas que son, en principio, independientes: los asistentes de demostración y la lógica modal.
 
-Los asistentes de demostración atacan esta pregunta de frente. Son programas
-que permiten escribir definiciones, enunciados y demostraciones en un
-lenguaje formal, y que solo aceptan una demostración cuando cada uno de sus
-pasos ha sido verificado mecánicamente a partir de los axiomas del sistema y los resultados previamente introducidos y comprobados.
-La idea no es nueva. Se remonta a proyectos como Automath (1967) o Mizar
-(1973). Además, en los últimos años ha ganado un impulso enorme: sistemas
-como Rocq o Lean cuentan hoy con comunidades muy activas y con bibliotecas que cubren buena parte del grado en Matemáticas y más allá \cite{mathlib}. En este trabajo se usa Lean~4, por la cantidad de material abierto para su aprendizaje en línea y la cultura de uso que está comenzando a generarse en nuestra Facultad.
+\subsection*{Los asistentes de demostración}
 
-En lo personal, los asistentes de demostración, con sus respectivas bibliotecas, despiertan un interés particular por el acercamiento aparente que presentan al ideal de construcción de un "árbol de las matemáticas". Esto es, la posibilidad de tener, de forma tangible, un grafo de todos los teoremas y resultados matemáticos y cómo se derivan unos de otros. A grandes rasgos y de forma ingenua, esto tendría dos implicaciones muy interesantes en direcciones opuestas: en un sentido descendente, poder generar un árbol de dependencias para cada resultado, teorema, etc. En otro ascendente, la posibilidad de que, el avance tecnológico y de la inteligencia artificial, unidos a la posibilidad de verificación mecánica de resultados, permitan avanzar en un futuro en la demostración de problemas abiertos.
-Este ideal es, como se ha mencionado antes, atractivo pero ingenuo por varias razones, algunas de las cuales se enfrentarán en el desarrollo de este trabajo y se comentarán en sus conclusiones.
+Una demostración matemática es, teóricamente, un objeto completamente preciso: una cadena de pasos en la que cada afirmación se sigue de las anteriores mediante reglas aceptadas. En la práctica, sin embargo, las demostraciones que escribimos rara vez son absolutamente formales. Hay pasos ``evidentes'' que se omiten, casos ``análogos'' que no se comprueban o notación que se sobreentiende. En general, este nivel de detalle es el adecuado para hacer matemáticas entre personas, pero deja abierta una pregunta incómoda respecto de la formalización pura: ¿cómo sabemos que no se nos ha escapado nada?
 
-\vspace{3mm}
+Los asistentes de demostración atacan esta pregunta de frente. Son programas que permiten escribir definiciones, enunciados y demostraciones en un lenguaje formal, y que solo aceptan una demostración cuando cada uno de sus pasos ha sido verificado mecánicamente a partir de los axiomas del sistema y los resultados previamente introducidos y comprobados. La idea no es nueva. Se remonta a proyectos como Automath (1967) o Mizar (1973) (AAA referencias). Además, en los últimos años ha ganado un impulso enorme. Sistemas como Rocq (anteriormente Coq) o Lean cuentan hoy con comunidades muy activas y con bibliotecas que cubren buena parte del grado en Matemáticas y más allá \cite{mathlib}. En este trabajo se usa Lean~4, por la cantidad de material abierto para su aprendizaje en línea y la cultura de uso que está comenzando a generarse en nuestra Facultad.
 
-\underline{Sobre lógica modal}
+En lo personal, los asistentes de demostración, con sus respectivas bibliotecas, despiertan un interés particular por el acercamiento aparente que presentan al ideal de construcción de un ``árbol de las matemáticas''. Esto es, la posibilidad de tener, de forma tangible, un grafo de todos los teoremas y resultados matemáticos y cómo se derivan unos de otros. A grandes rasgos y de forma ingenua, esto tendría dos implicaciones muy interesantes en direcciones opuestas: en un sentido descendente, poder generar un árbol de dependencias para cada resultado, teorema, etc; en otro ascendente, la posibilidad de que, el avance tecnológico y de la inteligencia artificial, unidos al desarrollo de la verificación mecánica de resultados, permitan avanzar en un futuro en la demostración de problemas abiertos. Este ideal es, como se ha mencionado antes, atractivo pero ingenuo por varias razones, algunas de las cuales se enfrentarán en el desarrollo de este trabajo y se comentarán en sus conclusiones.
 
-Como caso de estudio para aprender a usar un asistente de demostración se ha
-elegido la lógica modal. La lógica modal extiende la lógica
-proposicional clásica con dos operadores nuevos: $\nec$ y $\pos$ que, habitualmente, se leen como ``\emph{es necesario}'' y ``\emph{es posible}'' respectivamente. Más adelante veremos que esto no es más que su interpretación clásica, pero existen otras dependiendo de la modalidad que se quiera considerar. Su semántica habitual se define sobre los modelos de Kripke, que son esencialmente grafos dirigidos cuyos nodos, llamados \emph{mundos posibles}, llevan asociada una valoración de las variables proposicionales. El sistema modal más básico es la lógica $\K$, que se obtiene añadiendo al cálculo
-proposicional el axioma K, que distribuye $\nec$ sobre la implicación, y la regla de necesitación, que permite concluir $\nec \varphi$ de $\varphi$. Los dos resultados centrales de la teoría son los teoremas de \emph{corrección} y \emph{completitud}: todo lo demostrable en $\K$ es válido en todos los modelos de Kripke y, recíprocamente, todo lo válido es demostrable.
+\subsection*{La lógica modal}
 
-La lógica modal resulta un caso de estudio para este trabajo especialmente apropiado por
-varios motivos. Primero, es un tema autocontenido: su sintaxis y su cálculo
-se definen desde cero, sin apoyarse en grandes construcciones previas, lo
-que permite formalizarlo casi entero en lugar de importar la mitad del trabajo de
-una biblioteca. Segundo, tiene una dificultad suficiente: la corrección es un
-ejercicio asequible de inducción, mientras que la completitud, con sus múltiples pasos intermedios, es una demostración no trivial que pone a prueba tanto al asistente como a quien lo maneja. Y tercero, es un tema con recorrido y relevancia en mi rama de especialización: sobre la lógica $\K$ se construyen las lógicas epistémicas y temporales que se usan en informática para razonar sobre conocimiento y sobre programas.
+La lógica modal extiende la lógica proposicional clásica con dos operadores nuevos: $\nec$ y $\pos$ que, habitualmente, se leen como ``\emph{es necesario}'' y ``\emph{es posible}'' respectivamente. Más adelante veremos que esto no es más que su interpretación clásica, pero existen otras dependiendo de la modalidad que se quiera considerar. Su semántica habitual se define sobre los modelos de Kripke, que son esencialmente grafos dirigidos cuyos nodos, llamados \emph{mundos posibles}, llevan asociada una valoración de las variables proposicionales. El sistema modal más básico es la lógica $\K$, que se obtiene añadiendo al cálculo proposicional el axioma K, que distribuye $\nec$ sobre la implicación, y la regla de necesitación, que permite concluir $\nec \varphi$ de un teorema $\varphi$. Los dos resultados centrales de la teoría son los teoremas de \emph{corrección} y \emph{completitud}: todo lo demostrable en $\K$ es válido en todos los modelos de Kripke y, recíprocamente, todo lo válido es demostrable.
+
+La lógica modal resulta un caso de estudio, para este trabajo con Lean, especialmente apropiado por varios motivos. Primero, es un tema autocontenido: su sintaxis y su cálculo se definen desde cero, sin apoyarse en grandes construcciones previas, lo que permite formalizarlo casi entero en lugar de importar la mitad del trabajo de una biblioteca. Segundo, tiene una dificultad suficiente: la corrección es un ejercicio asequible de inducción, mientras que la completitud, con sus múltiples pasos intermedios, es una demostración no trivial que pone a prueba tanto al asistente como a quien lo maneja. Y tercero, es un tema con recorrido y relevancia en mi rama de especialización: sobre la lógica $\K$ se construyen las lógicas epistémicas y temporales que se usan en informática para razonar sobre conocimiento y sobre programas.
 
 Hay que señalar que la lógica modal ya tiene formalizaciones con un estilo más sintético, similar al de la biblioteca Mathlib, y con importante carga de importaciones de la misma (AAA referencias). Este trabajo no pretende competir con esas formalizaciones, sino hacer algo distinto con ellas como referencia lejana: una formalización didáctica, pensada para ser leída. Las demostraciones de Mathlib están optimizadas para ser mantenibles y compactas, y con frecuencia resultan casi ilegibles para quien no es experto. Las expuestas en este trabajo, en cambio, están escritas paso a paso, comentadas, y eligiendo en cada momento la táctica que mejor refleja el razonamiento matemático que se está haciendo, aunque no sea necesariamente lo más óptimo para un asistente de demostración.
 
 \section{Objetivos}
 
-El objetivo general del trabajo es formalizar en Lean~4 la lógica modal
-$\K$ y demostrar en este entorno su corrección y completitud respecto de los
-modelos de Kripke, tal como fija la propuesta del TFG. Este objetivo general
-se concreta en los siguientes objetivos específicos:
+El objetivo general del trabajo es formalizar en Lean~4 la lógica modal $\K$ y demostrar en este entorno su corrección y completitud respecto de los modelos de Kripke, tal como fija la propuesta del TFG. Este objetivo general se concreta en los siguientes objetivos específicos:
 
 \begin{enumerate}
-  \item Aprender el manejo de Lean~4 como asistente de demostración
-        partiendo de cero: su fundamento en teoría de tipos, su lenguaje de
-        definiciones y su modo táctico.
-  \item Estudiar la lógica modal $\K$ y su semántica de Kripke, siguiendo
-        principalmente el texto de Blackburn, de Rijke y Venema
-        \cite{blackburn}, hasta la demostración clásica de
-        completitud por modelos canónicos.
-  \item Formalizar la sintaxis, el sistema axiomático y la semántica, y
-        demostrar formalmente los teoremas de corrección y completitud,
-        junto con los resultados auxiliares que requieren (teorema de
-        deducción, lema de Lindenbaum, lema de verdad).
-  \item AAA Como ampliación, explorar una aplicación de la maquinaria anterior
-        al razonamiento epistémico, tomando como hilo conductor el problema
-        de los niños embarrados (\emph{muddy children}).
+  \item Aprender el manejo de Lean~4 como asistente de demostración partiendo de cero: su fundamento en teoría de tipos, su lenguaje de definiciones y su modo táctico.
+  \item Estudiar la lógica modal $\K$ y su semántica de Kripke, siguiendo principalmente el texto de Blackburn, de Rijke y Venema \cite{blackburn}, hasta la demostración clásica de completitud por modelos canónicos.
+  \item Formalizar la sintaxis, el sistema axiomático y la semántica, y demostrar formalmente los teoremas de corrección y completitud, junto con los resultados auxiliares que requieren (teorema de deducción, lema de Lindenbaum, lema de verdad, etc.).
+  \item AAA Como ampliación, explorar una aplicación de la maquinaria anterior al razonamiento epistémico, tomando como hilo conductor el problema de los niños embarrados (\emph{muddy children}).
 \end{enumerate}
 
 \section{Metodología y plan de trabajo}
 
-El trabajo se ha desarrollado en tres fases que, en la práctica, se han
-solapado constantemente. Debe tenerse en cuenta que, para el presente trabajo se ha tenido que aprender un software desconocido para formalizar un contenido matemático igualmente desconocido.
+El trabajo se ha desarrollado en tres fases que, en la práctica, se han solapado constantemente. Debe tenerse en cuenta que, para el presente trabajo, se ha tenido que aprender un software desconocido para formalizar un contenido matemático igualmente desconocido.
 
-\textbf{Fase de aprendizaje.} El primer contacto con Lean se realizó a
-través de materiales introductorios de la comunidad: el \emph{Natural Number
-Game} \cite{nng}, el libro \emph{Theorem Proving in Lean 4} \cite{tpil} y
-\emph{Mathematics in Lean} \cite{mil}. En paralelo se estudió la parte de
-lógica modal, principalmente los capítulos 1 y 4 de \cite{blackburn}, que
-cubren sintaxis, semántica y la completitud por modelos canónicos.
+\textbf{Fase de aprendizaje.} El primer contacto con Lean se realizó a través de materiales introductorios de la comunidad: el \emph{Natural Number Game} \cite{nng}, el libro \emph{Theorem Proving in Lean 4} \cite{tpil} y \emph{Mathematics in Lean} \cite{mil}. En paralelo se estudió la parte de lógica modal, principalmente los capítulos 1 y 4 de \cite{blackburn}, que cubren sintaxis, semántica y la completitud por modelos canónicos.
 
-\textbf{Fase de formalización.} La formalización se construyó de forma
-incremental, en el mismo orden en que se presenta en el capítulo
-\ref{sec:formalizacion}: sintaxis, sistema axiomático, semántica, corrección
-y, por último, completitud. Cada bloque se validó con ejemplos y algunos lemas que sirvieran de verificación y ejemplificación (por ejemplo, comprobar que las conectivas derivadas reciben el significado semántico esperado) antes de pasar al siguiente. Cabe destacar que hay dos decisiones de diseño separan nuestra formalización del desarrollo en papel de \cite{blackburn} y se justifican con detalle en su momento: la noción de
-deducibilidad desde hipótesis se define de manera inductiva (en lugar de
-mediante conjunciones finitas de premisas) y el lema de Lindenbaum se
-demuestra importando el lema de Zorn (eliminando la hipótesis de numerabilidad del
-lenguaje).
+\textbf{Fase de formalización.} La formalización se construyó de forma incremental, en el mismo orden en que se presenta en el capítulo \ref{sec:formalizacion}: sintaxis, sistema axiomático, semántica, corrección y, por último, completitud. Cada bloque se validó con ejemplos y algunos lemas que sirvieran de verificación y ejemplificación (por ejemplo, comprobar que las conectivas derivadas reciben el significado semántico esperado) antes de pasar al siguiente. Cabe destacar que hay dos decisiones de diseño que separan nuestra formalización del desarrollo en papel de \cite{blackburn} y que se justifican con detalle en su momento: la noción de deducibilidad desde hipótesis, que se define de forma inductiva, y el lema de Lindenbaum, que se demuestra importando el lema de Zorn, lo que permite eliminar la hipótesis de numerabilidad del lenguaje.
 
-\textbf{Fase de redacción.} La memoria se ha escrito con el código ya
-estable, lo que ha permitido que cada táctica y cada construcción de Lean
-que se explica en el capítulo \ref{sec:lean} aparezca realmente usada en el
-capítulo \ref{sec:formalizacion}, y recíprocamente. Es decir, no se explica nada que
-no se use, ni se usa nada que no se explique.
+\textbf{Fase de redacción.} La memoria se ha escrito con el código ya estable, lo que ha permitido que cada táctica y cada construcción de Lean que se explica en el capítulo \ref{sec:lean} aparezca realmente usada en el capítulo \ref{sec:formalizacion}, y recíprocamente. Es decir, no se explica nada que no se use, ni se usa nada que no se explique.
 
-\vspace{3mm}
+\subsection*{AAAUso de herramientas de inteligencia artificial}
 
-\underline{AAA Nota sobre el uso de IA}
-
-Conviene hacer una aclaración sobre las herramientas empleadas. La inmensa
-mayoría de las demostraciones se han escrito a mano, con la ayuda del
-\emph{InfoView} de Lean.
-En un número reducido de teoremas técnicos se ha recurrido a herramientas de inteligencia
-artificial, en concreto Claude, como apoyo para encontrar las tácticas adecuadas para el desarrollo de la demostración. En todos los casos, las demostraciones han sido escritas y desarrolladas manualmente, revisadas, comentadas línea a línea y, por supuesto, verificadas por Lean, que es en última instancia quien garantiza su
-corrección.
+Conviene hacer una aclaración sobre las herramientas empleadas. La inmensa mayoría de las demostraciones se han escrito a mano, con la ayuda del \emph{InfoView} de Lean. En un número reducido de teoremas técnicos se ha recurrido a herramientas de inteligencia artificial, en concreto Claude, como apoyo para encontrar las tácticas adecuadas para el desarrollo de la demostración. En todos los casos, las demostraciones han sido escritas y desarrolladas manualmente, revisadas, comentadas línea a línea y, por supuesto, verificadas por Lean, que es en última instancia quien garantiza su corrección.
 
 \section{Estructura de la memoria}
 
-El resto de la memoria se organiza como sigue.
+El resto de la memoria se organiza como sigue:
 
-El capítulo \ref{sec:lean} presenta Lean: qué es un asistente de demostración, en qué teoría de tipos se fundamenta, cómo se escriben definiciones y demostraciones, y un catálogo razonado de todas las tácticas que se emplean en este trabajo.
-
-El capítulo
-\ref{sec:logicamodal} desarrolla la parte matemática: la sintaxis del
-lenguaje modal, el sistema $\K$, la semántica de Kripke y el mapa de la
-demostración de completitud que después se formaliza.
-
-El capítulo \ref{sec:formalizacion} es el núcleo del trabajo: recorre la formalización
-completa, desde el tipo inductivo de las fórmulas hasta el teorema de
-adecuación, explicando y justificando cada decisión de diseño y cada
-demostración.
-
-AAAEl capítulo \ref{sec:muddy} esboza la ampliación hacia la
-lógica epistémica y el problema de los niños embarrados.
-
-Finalmente, el capítulo \ref{sec:conclusiones} recoge las conclusiones y otros comentarios finales.
+\begin{itemize}
+      \item El capítulo \ref{sec:lean} presenta Lean: qué es un asistente de demostración, en qué teoría de tipos se fundamenta, cómo se escriben definiciones y demostraciones, y un catálogo razonado de todas las tácticas que se emplean en este trabajo.
+      \item El capítulo \ref{sec:logicamodal} desarrolla la parte matemática: la sintaxis del lenguaje modal, el sistema $\K$, la semántica de Kripke y el mapa de la demostración de completitud que después se formaliza.
+      \item El capítulo \ref{sec:formalizacion} es el núcleo del trabajo: recorre la formalización completa, desde el tipo inductivo de las fórmulas hasta el teorema de adecuación, explicando y justificando cada decisión de diseño y cada demostración.
+      \item AAAEl capítulo \ref{sec:muddy} esboza la ampliación hacia la lógica epistémica y el problema de los niños embarrados.
+      \item El capítulo \ref{sec:conclusiones}, finalmente, recoge las conclusiones y otros comentarios finales.
+\end{itemize}
