@@ -1,6 +1,6 @@
 % =====================================================================
 %  PREÁMBULO
-% 
+%
 % Adiciones y modificaciones a 'ucmthesis.cls'
 % =====================================================================
 
@@ -11,6 +11,7 @@
 \usepackage[spanish,es-noshorthands]{babel}
 \addto\captionsspanish{%
   \renewcommand{\contentsname}{Tabla de contenidos}%
+  \renewcommand{\tablename}{Tabla}
   }
 
 % ----------------------- Matemáticas ---------------------------------
@@ -29,8 +30,8 @@
 
 \usepackage[strings]{underscore}
 
-\definecolor{leankw}{RGB}{0,90,180}       
-\definecolor{leantactic}{RGB}{130,30,120} 
+\definecolor{leankw}{RGB}{0,90,180}
+\definecolor{leantactic}{RGB}{130,30,120}
 \definecolor{leancomment}{RGB}{110,110,110}
 \definecolor{leanbg}{RGB}{247,247,250}
 \definecolor{leanframe}{RGB}{200,200,210}
@@ -59,6 +60,7 @@
     {⊨}{{$\vDash$}}1
     {∈}{{$\in$}}1               {∉}{{$\notin$}}1
     {⊆}{{$\subseteq$}}1         {∪}{{$\cup$}}1
+    {⋃₀}{{$\bigcup\nolimits_{0}$}}2
     {⋃}{{$\bigcup$}}1           {∅}{{$\varnothing$}}1
     {∀}{{$\forall$}}1           {∃}{{$\exists$}}1
     {⟨}{{$\langle$}}1            {⟩}{{$\rangle$}}1
@@ -68,6 +70,7 @@
     {Γ}{{$\Gamma$}}1            {Δ}{{$\Delta$}}1
     {Θ}{{$\Theta$}}1
     {α}{{$\alpha$}}1              {β}{{$\beta$}}1
+    {λ}{{$\lambda$}}1
     {₀}{{${}_0$}}1              {₁}{{${}_1$}}1
     {₂}{{${}_2$}}1              {ₙ}{{${}_n$}}1
     {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'{\i}}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
@@ -97,6 +100,9 @@
   numbersep=8pt,
   firstnumber=1,
 }
+
+\lstnewenvironment{leansnippet}{\lstset{numbers=none}}{}
+\newcommand{\tactica}[1]{\paragraph{#1.}}
 
 % --- Símbolos Unicode utilizables en modo texto (para \lean y la prosa) ---
 \DeclareUnicodeCharacter{2192}{\ensuremath{\to}}
@@ -138,6 +144,7 @@
 \DeclareUnicodeCharacter{0398}{\ensuremath{\Theta}}
 \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha}}
 \DeclareUnicodeCharacter{03B2}{\ensuremath{\beta}}
+\DeclareUnicodeCharacter{03BB}{\ensuremath{\lambda}}
 \DeclareUnicodeCharacter{2080}{\ensuremath{{}_0}}
 \DeclareUnicodeCharacter{2081}{\ensuremath{{}_1}}
 \DeclareUnicodeCharacter{2082}{\ensuremath{{}_2}}
@@ -206,3 +213,4 @@
 \end{alwayssingle}}
 \makeatother
 
+\usepackage{hyperref}

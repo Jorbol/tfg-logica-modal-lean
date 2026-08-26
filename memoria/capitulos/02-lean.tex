@@ -3,169 +3,69 @@
 % =====================================================================
 \chapter{El asistente de demostración Lean}\label{sec:lean}
 
-Este capítulo presenta Lean con un criterio concreto: explicar lo aprendido en el manejo de la herramienta y lo necesario para la formalizar el capítulo \ref{sec:formalizacion}, cosas equivalentes. Empezamos situando Lean entre los asistentes de demostración (sección \ref{sec:itp}); después describimos su fundamento teórico, la teoría de tipos dependientes, en la medida en que hace falta para entender qué significa que ``una demostración es un término'' (sección \ref{sec:tipos}); a continuación explicamos cómo se
-escriben definiciones y teoremas (sección \ref{sec:escribir-lean}); cómo
-funciona el modo táctico (sección \ref{sec:modo-tactico}); y cerramos con un
-catálogo razonado de todas las tácticas que se usan en este trabajo (sección
-\ref{sec:tacticas}) y con las herramientas de Mathlib de las que dependemos,
-en particular la lógica clásica y el lema de Zorn (sección
-\ref{sec:mathlib}).
+Este capítulo presenta Lean con un criterio concreto: explicar lo aprendido en el manejo de la herramienta y lo necesario para la formalización del capítulo \ref{sec:formalizacion}. Empezamos situando Lean entre los asistentes de demostración (sección \ref{sec:itp}); después describimos su fundamento teórico, la teoría de tipos dependientes, en la medida en que hace falta para entender qué significa que ``una demostración es un término'' (sección \ref{sec:tipos}); a continuación explicamos cómo se escriben definiciones y teoremas (sección \ref{sec:escribir-lean}); cómo funciona el modo táctico (sección \ref{sec:modo-tactico}); y cerramos con un catálogo razonado de todas las tácticas que se usan en este trabajo (sección \ref{sec:tacticas}) y con las herramientas de Mathlib de las que dependemos, en particular la lógica clásica y el lema de Zorn (sección \ref{sec:mathlib}).
 
 \section{La demostración asistida por ordenador}\label{sec:itp}
 
-Un asistente de demostración es un programa con dos componentes bien
-diferenciadas. Por un lado, un lenguaje formal en el que el usuario
-escribe definiciones, enunciados y demostraciones. Por otro, un
-núcleo (\emph{kernel}): un verificador pequeño que
-comprueba, paso a paso, que cada demostración es correcta según las reglas
-de la lógica subyacente. Todo lo demás (editor, tácticas, automatización...) son capas de comodidad: pueden ayudar a construir la demostración, pero la única autoridad que la acepta es el núcleo.
-Esta arquitectura, conocida como criterio de De Bruijn (AAA), es lo que hace
-razonable fiarse del sistema: para dudar de un teorema verificado hay que
-dudar de un programa de unos pocos miles de líneas, no de los cientos de
-miles que forman el resto de la herramienta.
+Un asistente de demostración es un programa con dos componentes bien diferenciadas. Por un lado, un lenguaje formal en el que el usuario escribe definiciones, enunciados y demostraciones. Por otro, un núcleo (\emph{kernel}) que es un verificador pequeño que comprueba, paso a paso, que cada demostración es correcta según las reglas de la lógica subyacente. Todo lo demás (editor, tácticas, automatización...) son capas de comodidad. Pueden ayudar a construir la demostración, pero la única autoridad que la acepta es el núcleo. Esta arquitectura, conocida como criterio de De Bruijn (AAA), es lo que hace razonable fiarse del sistema. Esto es, para dudar de un teorema verificado hay que dudar de un programa de miles de líneas, no de cientos de miles que forman el resto de la herramienta.
 
-Los primeros sistemas de este tipo, como Automath (1967) y Mizar (1973),
-demostraron que la idea era viable. Hoy los asistentes más usados en
-matemáticas son Rocq, Isabelle/HOL y Lean. Lean \cite{lean4}, desarrollado inicialmente por Leonardo de Moura en Microsoft Research y mantenido actualmente por la Lean Focused Research Organisation, es a la vez un asistente de demostración y un lenguaje de programación funcional. En este trabajo usamos su cuarta versión, Lean~4, junto con su biblioteca matemática Mathlib \cite{mathlib}, un proyecto comunitario que reúne, verificadas, buena parte de las matemáticas de grado y posgrado. De Mathlib solo importaremos su infraestructura básica: la teoría elemental de
-conjuntos, el modo táctico y, en un punto crucial, el lema de Zorn.
+Los primeros sistemas de este tipo, como Automath (1967) y Mizar (1973), demostraron que la idea era viable. Hoy los asistentes más usados en matemáticas son Rocq, Isabelle/HOL y Lean. Lean \cite{lean4}, desarrollado inicialmente por Leonardo de Moura en Microsoft Research y mantenido actualmente por la Lean Focused Research Organisation, es a la vez un asistente de demostración y un lenguaje de programación funcional. En este trabajo usamos su cuarta versión, Lean~4, junto con su biblioteca matemática Mathlib \cite{mathlib}, un proyecto comunitario que reúne, verificadas, buena parte de las matemáticas de grado y posgrado. De Mathlib solo importaremos su infraestructura básica: la teoría elemental de conjuntos, el modo táctico y, en un punto crucial, el lema de Zorn.
 
-En la práctica, trabajar con Lean se parece a mantener un diálogo. El
-usuario escribe en el editor y una ventana lateral, el \emph{InfoView}, muestra en cada momento el estado de la demostración: qué hipótesis hay disponibles y qué falta por demostrar.
-Cada instrucción del usuario transforma ese estado, y la demostración
-termina cuando no queda nada pendiente por probar. Veremos ese mecanismo con detalle en
-la sección \ref{sec:modo-tactico}.
+En la práctica, trabajar con Lean se parece a mantener un diálogo. El usuario escribe en el editor y una ventana lateral, el \emph{InfoView}, muestra en cada momento el estado de la demostración: qué hipótesis hay disponibles y qué falta por demostrar. Cada instrucción del usuario transforma ese estado, y la demostración termina cuando no queda nada pendiente por probar. Veremos ese mecanismo con detalle en la sección \ref{sec:modo-tactico}. (AAA imagen del editor aquí o en 2.4)
 
 \section{El fundamento: la teoría de tipos}\label{sec:tipos}
 
-La lógica sobre la que se construye Lean no es la teoría de conjuntos de
-Zermelo--Fraenkel, sino una \emph{teoría de tipos dependientes} llamada
-cálculo de construcciones con tipos inductivos. No necesitamos conocer este cálculo en
-profundidad, pero sí entender tres de sus ideas, porque aparecen
-constantemente en la formalización: 1) todo término tiene un tipo, 2) las
-proposiciones son tipos, y 3) los tipos inductivos.
+La lógica sobre la que se construye Lean no es la teoría de conjuntos de Zermelo--Fraenkel, sino una \emph{teoría de tipos dependientes} llamada cálculo de construcciones con tipos inductivos. No necesitamos conocer este cálculo en profundidad, pero sí entender tres de sus ideas, porque aparecen constantemente en la formalización: 1) todo término tiene un tipo, 2) las proposiciones son tipos, y 3) qué son los tipos inductivos.
 
 \subsection{Todo término tiene un tipo}
 
-En teoría de tipos, los objetos básicos son los términos, y cada
-término tiene asignado un tipo. La notación \lean{x : T} se lee
-``\lean{x} es un término de tipo \lean{T}'' y es la afirmación fundamental
-del sistema; juega un papel análogo al de la pertenencia $x \in A$ en teoría
-de conjuntos, con una diferencia importante: un término tiene un único tipo,
-que puede calcularse mecánicamente. Por ejemplo, \lean{(2 : Nat)} declara
-que \lean{2} es un número natural, y \lean{Nat} es a su vez un término cuyo
-tipo es \lean{Type}, el ``tipo de los tipos'' de datos.%
-\footnote{Para evitar paradojas del estilo de la de Russell, \lean{Type} no
-puede ser término de sí mismo: Lean organiza los tipos en una jerarquía
-infinita \lean{Type 0}, \lean{Type 1}, \lean{Type 2}, \dots\ llamada
-\emph{jerarquía de universos}. En este trabajo no hará falta subir nunca de
-\lean{Type} (que abrevia \lean{Type 0}) y \lean{Prop}, así que no volveremos
-a mencionar los universos.}
+En teoría de tipos, los objetos básicos son los términos, y cada término tiene asignado un tipo. La notación \lean{x : T} se lee ``\lean{x} es un término de tipo \lean{T}'' y es la afirmación fundamental del sistema; juega un papel análogo al de la pertenencia $x \in A$ en teoría de conjuntos, con una diferencia importante: un término tiene un único tipo, que puede calcularse mecánicamente. Por ejemplo, \lean{(2 : Nat)} declara que \lean{2} es un número natural, y \lean{Nat} es a su vez un término cuyo tipo es \lean{Type}, el ``tipo de los tipos'' de datos.\footnote{Para evitar paradojas del estilo de la de Russell, \lean{Type} no puede ser término de sí mismo: Lean organiza los tipos en una jerarquía infinita \lean{Type 0}, \lean{Type 1}, \lean{Type 2}, \dots\ llamada \emph{jerarquía de universos}. En este trabajo no hará falta subir nunca de \lean{Type} (que abrevia \lean{Type 0}) y \lean{Prop}, así que no volveremos a mencionar los universos.}
 
-Los tipos de funciones se escriben con una flecha: una función de los
-naturales en los naturales tiene tipo \lean{Nat → Nat}, y si
-\lean{f : Nat → Nat} y \lean{n : Nat}, la aplicación se escribe por
-yuxtaposición, \lean{f n}, sin paréntesis. Las funciones de varios
-argumentos se representan encadenando flechas, que asocian a la derecha:
-\lean{Nat → Nat → Nat} es el tipo de las funciones que reciben un natural y
-devuelven una función \lean{Nat → Nat}; en la práctica, una función de dos
-argumentos. Las funciones anónimas se escriben con la palabra clave
-\lean{fun}: por ejemplo, \lean{fun n => n + 1} es la función que a cada
-\lean{n} le asigna \lean{n + 1}. Esta notación aparecerá al definir modelos
-concretos, como \lean{R := fun _ _ => False} (la relación que no relaciona
-nada con nada; el guion bajo indica un argumento cuyo nombre no interesa).
+Los tipos de funciones se escriben con una flecha. Una función de los naturales en los naturales tiene tipo \lean{Nat → Nat}, y si \lean{f : Nat → Nat} y \lean{n : Nat}, la aplicación se escribe por yuxtaposición, \lean{f n}, sin paréntesis. Las funciones de varios argumentos se representan encadenando flechas, que asocian a la derecha: \lean{Nat → Nat → Nat} es el tipo de las funciones que reciben un natural y devuelven una función \lean{Nat → Nat}; en la práctica, una función de dos argumentos.
 
-La teoría es dependiente porque el tipo del resultado de una función
-puede depender del valor del argumento. El ejemplo que nos importa es el
-cuantificador universal: el tipo \lean{∀ x : A, P x} es el tipo de las
-funciones que a cada \lean{x : A} le asignan un término de tipo \lean{P x},
-donde \lean{P x} varía con \lean{x}. Esta lectura del $\forall$ como un tipo
-de funciones tiene consecuencias muy prácticas que veremos enseguida.
+Las funciones anónimas se escriben con la palabra clave \lean{fun}. Se trata de las $\lambda$-expresiones del cálculo lambda sobre el que se construye la teoría de tipos de Lean, y de hecho \lean{λ} es sintaxis igualmente válida y con el mismo significado. Por ejemplo:
+
+\begin{lstlisting}
+fun n => n + 1     -- la función que a cada n le asigna n + 1
+fun n m => n + m   -- dos argumentos: abrevia fun n => (fun m => n + m)
+fun _ _ => False   -- el guion bajo, un argumento cuyo nombre no interesa
+\end{lstlisting}
+
+La segunda línea muestra, del lado de los términos, el mismo encadenamiento que acabamos de ver en los tipos. La tercera aparecerá tal cual al definir modelos concretos en el capítulo \ref{sec:formalizacion}, como una relación que no relaciona nada con nada.
+
+La teoría es dependiente porque el tipo del resultado de una función puede depender del valor del argumento. El ejemplo que nos importa es el cuantificador universal. El tipo \lean{∀ x : A, P x} es el tipo de las funciones que a cada \lean{x : A} le asignan un término de tipo \lean{P x}. Lo característico es que aquí lo que varía con \lean{x} no es solo el valor del resultado, como en \lean{A → B}, sino su propio tipo: si \lean{f : ∀ x : A, P x} y tomamos \lean{x} e \lean{y} distintos, los resultados \lean{f x} y \lean{f y} habitan tipos distintos, \lean{P x} y \lean{P y}. El tipo \lean{A → B} es el caso particular en que \lean{P} no depende de \lean{x}. Esta lectura del \lean{∀} como un tipo de funciones tiene consecuencias muy prácticas que veremos enseguida.
 
 \subsection{Las proposiciones son tipos}
 
-Junto a \lean{Type}, Lean tiene otro universo llamado \lean{Prop}: el tipo
-de las proposiciones. Un término \lean{p : Prop} es un enunciado
-(``$2$ es par'', ``$\varphi$ es válida''), y la idea central del sistema,
-conocida como correspondencia de Curry--Howard o \emph{proposiciones como
-tipos}, es la siguiente:
+Junto a \lean{Type}, Lean tiene otro universo llamado \lean{Prop}, el tipo de las proposiciones. Un término \lean{p : Prop} es un enunciado (``$2$ es par'', ``$\varphi$ es válida''), y la idea central del sistema, conocida como correspondencia de Curry--Howard o \emph{proposiciones como tipos}, es la siguiente:
 
 \begin{center}
-Una demostración de la proposición \lean{p} es un término de tipo
-\lean{p}.
+Una demostración de la proposición \lean{p} es un término de tipo \lean{p}.
 \end{center}
 
-Es decir, las proposiciones se tratan exactamente igual que los demás
-tipos, y demostrar \lean{p} consiste en construir un término \lean{h : p}.
-Si no existe ningún término de tipo \lean{p}, la proposición no es
-demostrable. Bajo esta correspondencia, las conectivas lógicas se convierten
-en constructores de tipos y su comportamiento queda determinado por el de
-los tipos correspondientes:
+Es decir, las proposiciones se tratan exactamente igual que los demás tipos, y demostrar \lean{p} consiste en construir un término \lean{h : p}. Si no existe ningún término de tipo \lean{p}, la proposición no es demostrable. Bajo esta correspondencia, las conectivas lógicas se convierten en constructores de tipos y su comportamiento queda determinado por el de los tipos correspondientes:
 
 \begin{itemize}
-  \item \textbf{Las que son funciones.} Su demostración es un procedimiento
-        que transforma demostraciones en demostraciones, y usarla consiste
-        en aplicarlo.
+  \item \textbf{Las que son funciones.} Su demostración es un procedimiento que transforma demostraciones en demostraciones, y usarla consiste en aplicarlo.
         \begin{itemize}
-          \item La implicación \lean{p → q} es el tipo de las
-                funciones de \lean{p} en \lean{q}: demostrarla es dar una
-                función que convierte demostraciones de \lean{p} en
-                demostraciones de \lean{q}. Por eso, si \lean{h : p → q} y
-                \lean{hp : p}, entonces \lean{h hp : q}. El modus ponens es
-                la aplicación de funciones.
-          \item El cuantificador \lean{∀ x : A, P x} es el tipo de funciones
-                dependientes descrito antes: demostrarlo es dar un
-                procedimiento que a cada \lean{x} le asigna una demostración
-                de \lean{P x}, y usarlo sobre un elemento concreto \lean{a}
-                es aplicar la función: \lean{h a : P a}.
-          \item La negación \lean{¬p} se define como
-                \lean{p → False}, donde \lean{False} es la proposición sin
-                demostraciones (un tipo vacío) y \lean{True} la que tiene una
-                demostración trivial. Demostrar que \lean{p} es falsa es,
-                pues, dar una función que convierta cualquier hipotética
-                demostración de \lean{p} en una demostración de lo
-                imposible. Este detalle será importante: nuestra negación
-                modal $\mathord{\sim}\varphi := \varphi \limp \bot$ imita
-                exactamente esta definición, y esa imitación hará que varios
-                lemas semánticos sean ciertos ``por definición''.
+          \item La implicación \lean{p → q} es el tipo de las funciones de \lean{p} en \lean{q}: demostrarla es dar una función que convierte demostraciones de \lean{p} en demostraciones de \lean{q}. Por eso, si \lean{h : p → q} y \lean{hp : p}, entonces \lean{h hp : q}. El \emph{modus ponens} es la aplicación de funciones.
+          \item El cuantificador \lean{∀ x : A, P x} es el tipo de funciones dependientes descrito antes: demostrarlo es dar un procedimiento que a cada \lean{x} le asigna una demostración de \lean{P x}, y usarlo sobre un elemento concreto \lean{a} es aplicar la función, \lean{h a : P a}.
+          \item La negación \lean{¬p} se define como \lean{p → False}, donde \lean{False} es la proposición sin demostraciones (un tipo vacío) y \lean{True} la que tiene una demostración trivial. Demostrar que \lean{p} es falsa es, pues, dar una función que convierta cualquier hipotética demostración de \lean{p} en una demostración de lo imposible. Este detalle será importante. Nuestra negación modal $\mathord{\sim}\varphi := \varphi \limp \bot$ imita exactamente esta definición, y esa imitación hará que varios lemas semánticos sean ciertos ``por definición''.
         \end{itemize}
-  \item \textbf{Las que son pares (o sumas).} Su demostración se construye
-        empaquetando piezas, y usarla consiste en extraerlas.
+  \item \textbf{Las que son pares (o sumas).} Su demostración se construye empaquetando piezas, y usarla consiste en extraerlas.
         \begin{itemize}
-          \item La conjunción \lean{p ∧ q} es el tipo de los pares: una
-                demostración suya es un par \lean{⟨hp, hq⟩} formado por una
-                demostración de cada componente, que se recuperan con
-                \lean{.1} y \lean{.2}.
-          \item El bicondicional \lean{p ↔ q} es un par de implicaciones,
-                cuyas componentes se extraen con \lean{.mp} (de izquierda a
-                derecha) y \lean{.mpr} (de derecha a izquierda).
-          \item El existencial \lean{∃ x : A, P x} se demuestra con un par
-                \lean{⟨a, ha⟩}: un testigo \lean{a} y una
-                demostración \lean{ha : P a}. Es a la conjunción lo que el
-                cuantificador universal es a la implicación: un par en el
-                que el tipo de la segunda componente depende de la primera.
-          \item La disyunción \lean{p ∨ q} es la excepción de este grupo: no
-                es un par sino una suma, con dos constructores,
-                \lean{Or.inl hp} y \lean{Or.inr hq}, según qué componente se
-                demuestre. Construirla exige elegir un lado. Usarla, en
-                cambio, obliga a tratar los dos casos posibles.
+          \item La conjunción \lean{p ∧ q} es el tipo de los pares: una demostración suya es un par \lean{⟨hp, hq⟩} formado por una demostración de cada componente, que se recuperan con \lean{.1} y \lean{.2}.
+          \item El bicondicional \lean{p ↔ q} es un par de implicaciones, cuyas componentes se extraen con \lean{.mp} (de izquierda a derecha) y \lean{.mpr} (de derecha a izquierda).
+          \item El existencial \lean{∃ x : A, P x} se demuestra con un par \lean{⟨a, ha⟩}: un testigo \lean{a} y una demostración \lean{ha : P a}. Es un par en el que el tipo de la segunda componente depende de la primera.
+          \item La disyunción \lean{p ∨ q} es la excepción de este grupo: no es un par sino una suma, con dos constructores, \lean{Or.inl hp} y \lean{Or.inr hq}, según qué componente se demuestre. Construirla exige elegir un lado. Usarla, en cambio, obliga a tratar los dos casos posibles.
         \end{itemize}
 \end{itemize}
 
-Los corchetes angulares \lean{⟨ , ⟩} que acaban de aparecer son el
-constructor anónimo: una notación uniforme para construir términos de
-cualquier tipo con un solo constructor. Los tres primeros casos del segundo
-grupo son instancias de lo mismo, un par, con una o dos componentes que
-pueden depender entre sí, y por eso los tres se escriben igual; la
-disyunción, con sus dos constructores, queda fuera. Esta notación aparecerá
-constantemente, también para los elementos de las estructuras que definamos.
+Los corchetes angulares \lean{⟨ , ⟩} que acaban de aparecer son el constructor anónimo: una notación uniforme para construir términos de cualquier tipo con un solo constructor. Los tres primeros casos del segundo grupo son instancias de lo mismo, un par, con una o dos componentes que pueden depender entre sí, y por eso los tres se escriben igual; la disyunción, con sus dos constructores, queda fuera. Esta notación aparecerá constantemente, también para los elementos de las estructuras que definamos.
 
-\subsection{Tipos inductivos}\label{sec:tipos-inductivos}
+\subsection{Qué son los tipos inductivos}\label{sec:tipos-inductivos}
 
-La tercera idea es el mecanismo con el que se crean tipos nuevos: los
-tipos inductivos. Un tipo inductivo se define dando una lista de
-constructores, y sus términos son exactamente los que se obtienen
-aplicando constructores un número finito de veces. El ejemplo clásico son
-los números naturales, definidos en la biblioteca de Lean esencialmente así:
+La tercera idea es el mecanismo con el que se crean tipos nuevos: los tipos inductivos. Un tipo inductivo se define dando una lista de constructores, y sus términos son exactamente los que se obtienen aplicando esos constructores un número finito de veces. El ejemplo clásico son los números naturales, definidos en la biblioteca de Lean esencialmente así:
 
 \begin{lstlisting}
 inductive Nat where
@@ -173,118 +73,58 @@ inductive Nat where
   | succ : Nat → Nat       -- el sucesor de un natural es un natural
 \end{lstlisting}
 
-Cada línea que empieza por \lean{|} declara un constructor con su tipo. La
-definición debe leerse como: los términos de tipo \lean{Nat} son
-\lean{Nat.zero}, \lean{Nat.succ Nat.zero}, \lean{Nat.succ (Nat.succ
-Nat.zero)}, etcétera, y nada más. De este ``y nada más'' Lean
-extrae automáticamente dos herramientas:
+Cada línea que empieza por \lean{|} declara un constructor con su tipo. La definición debe leerse como: los términos de tipo \lean{Nat} son \lean{Nat.zero}, \lean{Nat.succ Nat.zero}, \lean{Nat.succ (Nat.succ Nat.zero)}, etcétera, y nada más. De este ``y nada más'' Lean extrae automáticamente dos herramientas:
 
 \begin{itemize}
-  \item Un \emph{principio de recursión}: para definir una función sobre un
-        tipo inductivo basta decir qué hace con cada constructor. Lo
-        usaremos, por ejemplo, para definir la relación de satisfacción por
-        recursión sobre la estructura de las fórmulas.
-  \item Un \emph{principio de inducción}: para demostrar que todos los
-        términos del tipo cumplen una propiedad basta demostrarla para cada
-        constructor, suponiéndola para sus argumentos (hipótesis de
-        inducción). La inducción usual sobre $\mathbb{N}$ es el caso
-        particular para \lean{Nat}; nosotros usaremos, además, la
-        inducción estructural sobre fórmulas.
+  \item Un \emph{principio de recursión}: para definir una función sobre un tipo inductivo basta decir qué hace con cada constructor. Lo usaremos, por ejemplo, para definir la relación de satisfacción por recursión sobre la estructura de las fórmulas.
+  \item Un \emph{principio de inducción}: para demostrar que todos los términos del tipo cumplen una propiedad basta demostrarla para cada constructor, suponiéndola para sus argumentos (hipótesis de inducción). La inducción usual sobre $\mathbb{N}$ es el caso particular para \lean{Nat}; nosotros usaremos, además, la inducción estructural sobre fórmulas.
 \end{itemize}
 
-Hay un uso de los tipos inductivos menos evidente y absolutamente central en
-este trabajo: se pueden definir proposiciones inductivas, es decir,
-familias de términos de \lean{Prop} generadas por constructores. Nuestra
-noción de demostrabilidad ($\proves \varphi$) será una proposición inductiva
-cuyos constructores son, literalmente, los axiomas y reglas del sistema
-$\K$: una demostración en $\K$ queda representada como un árbol finito de
-aplicaciones de constructores. La consecuencia es muy potente: el principio
-de inducción asociado permite hacer inducción sobre las
-demostraciones, que es exactamente la técnica con la que se prueba el
-teorema de corrección (``si los axiomas son válidos y las reglas preservan
-la validez, todo teorema es válido'').
+Hay un uso de los tipos inductivos menos evidente y central en este trabajo: se pueden definir proposiciones inductivas, es decir, familias de proposiciones indexadas, términos de tipo \lean{A → Prop}, cuyos constructores generan las demostraciones de cada miembro de la familia. Nuestra noción de demostrabilidad ($\proves \varphi$) será una proposición inductiva cuyos constructores son, literalmente, los axiomas y reglas del sistema $\K$. Una demostración en $\K$ queda así representada como un árbol finito de aplicaciones de constructores. La consecuencia es muy potente, pues el principio de inducción asociado permite hacer inducción sobre las demostraciones, que es exactamente la técnica con la que se prueba el teorema de corrección (``si los axiomas son válidos y las reglas preservan la validez, todo teorema es válido'').
 
-Por último, las estructuras (\lean{structure}) son el caso particular
-de tipo inductivo con un único constructor: sirven para empaquetar varios
-campos en un solo objeto, como un marco de Kripke (un tipo de mundos y una
-relación) o un modelo (un marco y una valoración). Si \lean{F} es una
-estructura con un campo \lean{R}, se accede a él con la notación
-\lean{F.R}; y una estructura puede extender a otra
-(\lean{extends}), heredando sus campos, como hará \lean{KripkeModel} con
-\lean{KripkeFrame}. Esto no es de especial relevancia, y se construirá con ánimo meramente ilustrativo.
+Por último, las estructuras (\lean{structure}) se apoyan en los tipos inductivos. Lean traduce cada estructura en un tipo inductivo con un único constructor y genera automáticamente las proyecciones que dan acceso a los campos. Sirven para empaquetar varios datos en un solo objeto, como un marco de Kripke (un tipo de mundos y una relación entre ellos) o un modelo (un marco y una valoración):
+
+\begin{lstlisting}
+structure KripkeFrame where
+  World : Type
+  R : World → World → Prop
+
+structure KripkeModel (VP : Type) extends KripkeFrame where
+  V : World → VP → Prop
+\end{lstlisting}
+
+Si \lean{F : KripkeFrame}, se accede a sus campos con la notación \lean{F.World} y \lean{F.R}. La palabra \lean{extends} indica que una estructura hereda los campos de otra: un \lean{KripkeModel} tiene los dos campos de \lean{KripkeFrame} además del suyo propio, de modo que si \lean{M : KripkeModel VP}, tanto \lean{M.R} como \lean{M.V} son legítimas. Estas dos declaraciones son exactamente las que se usarán en el capítulo \ref{sec:formalizacion} para definir la semántica.
 
 \section{Definiciones y enunciados}\label{sec:escribir-lean}
 
-Con el fundamento anterior, escribir Lean consiste en declarar términos y
-sus tipos. Las declaraciones que usamos son cuatro:
+Con el fundamento anterior, escribir Lean consiste en declarar términos y sus tipos. Las declaraciones que usamos son cuatro:
 
 \begin{itemize}
   \item \lean{def} introduce una definición con nombre. Por ejemplo,
-        \lean{def EsPar (n : Nat) : Prop := ∃ k : Nat, n = 2 * k} define la
-        propiedad de ser par: recibe un natural \lean{n} y devuelve la
-        proposición que afirma que \lean{n} es el doble de algún
-        \lean{k}. Entre el nombre y los dos puntos van los argumentos con su
-        tipo; lo que sigue a los dos puntos es el tipo del resultado (aquí
-        \lean{Prop}, porque lo definido es un enunciado y no un número), y
-        lo que sigue a \lean{:=} es el término definido. Así se definirán
-        propiedades en el capítulo \ref{sec:formalizacion} con nociones como la validez o la consistencia.
-  \item \lean{theorem} declara un teorema: su ``tipo'' es el enunciado (una
-        proposición) y su ``definición'' es la demostración (un término de
-        ese tipo). Que teoremas y definiciones tengan la misma forma es un ejemplo más de correspondencia de Curry--Howard.
-  \item \lean{example} es un teorema sin nombre: se verifica y se olvida.
-        Lo usamos para ejemplos o verificaciones que no se necesitan después.
-  \item \lean{variable} declara parámetros comunes a varias declaraciones.
-        En nuestro código, por ejemplo, \lean{variable \{VP : Type\}} fija de una vez el
-        tipo de las variables proposicionales para todo el desarrollo.
+\begin{lstlisting}
+def EsPar (n : Nat) : Prop := ∃ k : Nat, n = 2 * k
+\end{lstlisting}
+        define la propiedad de ser par: recibe un natural \lean{n} y devuelve la proposición que afirma que \lean{n} es el doble de algún \lean{k}. Entre el nombre y los dos puntos van los argumentos con su tipo; lo que sigue a los dos puntos es el tipo del resultado (aquí \lean{Prop}, porque lo definido es un enunciado y no un número), y lo que sigue a \lean{:=} es la definición. Así se definirán propiedades en el capítulo \ref{sec:formalizacion} con nociones como la validez o la consistencia.
+  \item \lean{theorem} declara un teorema: su ``tipo'' es el enunciado (una proposición) y su ``definición'' es la demostración (un término de ese tipo). Por ejemplo, \lean{theorem cuatro_es_par : EsPar 4 := ⟨2, rfl⟩} demuestra que 4 es par aportando el testigo \lean{k = 2} y la comprobación de que \lean{4 = 2 * 2}. Compárese con la declaración de \lean{EsPar}: la forma es idéntica, nombre, tipo y término tras \lean{:=}; lo único que cambia es que ahora el tipo es un enunciado. Que teoremas y definiciones tengan la misma forma es un ejemplo más de correspondencia de Curry--Howard.
+  \item \lean{example} es un teorema sin nombre: se verifica y se olvida. La declaración anterior escrita como \lean{example : EsPar 4 := ⟨2, rfl⟩} comprueba exactamente lo mismo, pero no deja nada utilizable después. Lo usamos para ejemplos o verificaciones que no se necesitan más adelante.
+  \item \lean{variable} declara parámetros comunes a varias declaraciones. En nuestro código, por ejemplo, \lean{variable \{VP : Type\}} fija de una vez el tipo de las variables proposicionales para todo el desarrollo.
 \end{itemize}
 
-\vspace{3mm}
+\subsection*{Argumentos implícitos}
 
-\underline{Argumentos implícitos}
-
-En algunas declaraciones aparecen argumentos
-entre llaves en lugar de entre paréntesis. Las llaves indican que el
-argumento es implícito: quien usa la definición no lo escribe, y Lean
-lo infiere del contexto. Por ejemplo, un lema sobre listas que afirme que
-invertir dos veces devuelve la lista de partida,
-\lean{theorem rev_rev \{α : Type\} (l : List α) : (l.reverse).reverse = l},
-tiene el tipo \lean{α} implícito: al aplicarlo a una lista concreta de
-naturales, Lean deduce por sí solo que \lean{α} es \lean{Nat} y escribirlo
-sería redundante. En el código, la regla práctica que se ha seguido es marcar como
-implícito todo argumento que pueda deducirse del tipo de los demás, y dejar
-explícitos los que no. En el capítulo \ref{sec:formalizacion}, el tipo de variables proposicionales sobre el que se construye todo el desarrollo será un argumento implícito de casi todas las definiciones y teoremas.
-
-\vspace{3mm}
-
-\underline{Notación}
-
-Lean permite introducir notación infija y prefija con
-niveles de precedencia. Por ejemplo,
+En algunas declaraciones aparecen argumentos entre llaves en lugar de entre paréntesis. Las llaves indican que el argumento es implícito: quien usa la definición no lo escribe, y Lean lo infiere del contexto. Por ejemplo, un lema sobre listas que afirme que invertir dos veces devuelve la lista de partida,
 
 \begin{lstlisting}
-local infixr:60 " ⟶ " => ModalFormula.imp
-local prefix:70 "□"     => ModalFormula.box
+theorem rev_rev {α : Type} (l : List α) : (l.reverse).reverse = l
 \end{lstlisting}
 
-declara que \lean{φ ⟶ ψ} abrevia \lean{ModalFormula.imp φ ψ} y que
-\lean{□φ} abrevia \lean{ModalFormula.box φ}. El número tras los dos puntos
-es la precedencia. A mayor número, más fuerte liga: así
-$\nec\varphi \longrightarrow \psi$ se lee $(\nec\varphi) \longrightarrow
-\psi$. La \lean{r} de \lean{infixr} indica asociatividad a la derecha (la
-convención habitual para la implicación) y el modificador \lean{local}
-restringe la notación al fichero actual. Como se discute en la sección
-\ref{sec:form-sintaxis}, elegimos deliberadamente símbolos distintos de los
-de Lean ($\longrightarrow$ frente a $\to$, $\sim$ frente a $\lnot$,
-$\curlywedge$ frente a $\land$\dots) para que siempre sea visible si una
-expresión es una fórmula modal o una proposición de Lean.
+tiene el tipo \lean{α} implícito, de modo que basta escribir \lean{rev_rev [1, 2, 3]} y Lean deduce que \lean{α} es \lean{Nat} sin más que mirar la lista. Si \lean{α} se hubiera declarado explícito, \lean{(α : Type)}, habría que escribir \lean{rev_rev Nat [1, 2, 3]}, repitiendo una información que ya está contenida en el segundo argumento. Cuando interesa dar un argumento implícito a mano, se antepone \lean{@} al nombre del resultado, lo que vuelve explícitos todos sus argumentos: \lean{@rev_rev Nat [1, 2, 3]}.
 
-\vspace{3mm}
+En el código se ha seguido la convención habitual en Lean: marcar como implícito todo argumento que pueda deducirse del tipo de los demás, y dejar explícitos los que no. En el capítulo \ref{sec:formalizacion}, el tipo de variables proposicionales sobre el que se construye todo el desarrollo será un argumento implícito de casi todas las definiciones y teoremas. Allí reaparecerá también la notación \lean{@}, en patrones como \lean{| @mp χ ξ _ _ ihχξ ihχ =>}, que nombran los argumentos implícitos de un constructor al razonar por inducción sobre las derivaciones.
 
-\underline{Definiciones por recursión}
+\subsection*{Definiciones por recursión}
 
-Como anticipamos, una función sobre un
-tipo inductivo puede definirse por casos sobre los constructores, mediante
-ajuste de patrones (\emph{pattern matching}):
+Como anticipamos, una función sobre un tipo inductivo puede definirse por casos sobre los constructores, mediante ajuste de patrones (\emph{pattern matching}):
 
 \begin{lstlisting}
 def suma : Nat → Nat → Nat
@@ -292,51 +132,34 @@ def suma : Nat → Nat → Nat
   | Nat.succ m, n => Nat.succ (suma m n)
 \end{lstlisting}
 
-Cada línea \lean{| patrón => valor} cubre un constructor; Lean comprueba que
-los casos son exhaustivos y que las llamadas recursivas se hacen sobre
-argumentos estrictamente menores, lo que garantiza que la definición
-termina. Sobre estas definiciones se apoya la noción de \emph{igualdad
-definicional}: dos expresiones son definicionalmente iguales si una se
-obtiene de la otra desplegando definiciones y computando. Por ejemplo,
-\lean{suma Nat.zero n} es definicionalmente \lean{n}, sin más que aplicar la
-primera cláusula. Las igualdades definicionales no necesitan demostración:
-la táctica \lean{rfl} (sección \ref{sec:tacticas}) las cierra de inmediato,
-y en la formalización señalaremos varios lemas cuya demostración completa
-es, precisamente, \lean{rfl}. La relación de satisfacción del capítulo
-\ref{sec:formalizacion} se define exactamente así, con una cláusula por cada
-conectiva del lenguaje modal.
+Cada línea \lean{| patrón => valor} cubre un constructor; Lean comprueba que los casos son exhaustivos y que las llamadas recursivas se hacen sobre subtérminos estrictos del argumento, esto es, sobre las piezas con las que el constructor lo formó. En \lean{suma}, el patrón \lean{Nat.succ m} da lugar a una llamada sobre \lean{m}. Como los términos de un tipo inductivo son árboles finitos, esta relación de subtérmino está bien fundada y garantiza que la definición termina\footnote{Lean admite además recursión bien fundada respecto de una medida arbitraria, declarada con \lean{termination_by}, para las definiciones en las que el criterio estructural no basta. En este trabajo no se ha necesitado en ningún momento.}.
+
+Sobre estas definiciones se apoya la noción de \emph{igualdad definicional}: dos expresiones son definicionalmente iguales si una se obtiene de la otra desplegando definiciones y computando. Por ejemplo, \lean{suma Nat.zero n} es definicionalmente \lean{n}, sin más que aplicar la primera cláusula. Las igualdades definicionales no necesitan demostración, pues la táctica \lean{rfl} (sección \ref{sec:tacticas}) las cierra de inmediato, y en la formalización señalaremos varios lemas cuya demostración completa es, precisamente, \lean{rfl}. La relación de satisfacción del capítulo \ref{sec:formalizacion} se define exactamente así, con una cláusula por cada conectiva del lenguaje modal.
+
+\subsection*{Notación}
+
+Lean permite introducir notación infija y prefija con niveles de precedencia. Por ejemplo,
+
+\begin{lstlisting}
+local infixr:60 " ⟶ " => ModalFormula.imp
+local prefix:70 "□"     => ModalFormula.box
+\end{lstlisting}
+
+declara que \lean{φ ⟶ ψ} abrevia \lean{ModalFormula.imp φ ψ} y que \lean{□φ} abrevia \lean{ModalFormula.box φ}. El número tras los dos puntos es la precedencia. A mayor número, más fuerte liga. Así, $\nec\varphi \longrightarrow \psi$ se lee $(\nec\varphi) \longrightarrow \psi$. La \lean{r} de \lean{infixr} indica asociatividad a la derecha (la convención habitual para la implicación) y el modificador \lean{local} restringe la notación al fichero actual. Como se discute en la sección \ref{sec:form-sintaxis}, elegimos deliberadamente símbolos distintos de los de Lean ($\longrightarrow$ frente a $\to$, $\sim$ frente a $\lnot$, $\curlywedge$ frente a $\land$\dots) para que siempre sea visible si una expresión es una fórmula modal o una proposición de Lean.
 
 \section{El modo táctico y el InfoView}\label{sec:modo-tactico}
 
-En principio, demostrar un teorema es escribir un término de su tipo, y para
-enunciados sencillos puede hacerse directamente. Por ejemplo, el modus
-ponens:
+Demostrar un teorema es escribir un término de su tipo, y para enunciados sencillos puede hacerse directamente. Por ejemplo, el \emph{modus ponens}:
 
 \begin{lstlisting}
 theorem mp {p q : Prop} (h : p → q) (hp : p) : q := h hp
 \end{lstlisting}
 
-La demostración es la aplicación \lean{h hp}, tal como vimos en la sección
-\ref{sec:tipos}: la implicación es una función y aplicarla es razonar.
-Pero construir a mano el término de una demostración larga es impracticable.
-Para eso existe el \emph{modo táctico}: escribiendo \lean{by} tras el
-enunciado, en lugar de un término se da una sucesión de tácticas,
-instrucciones que van construyendo el término por nosotros.
+La demostración es la aplicación \lean{h hp}, tal como vimos en la sección \ref{sec:tipos}: la implicación es una función y aplicarla es razonar. Pero construir a mano el término de una demostración larga es impracticable. Para eso existe el \emph{modo táctico}: escribiendo \lean{by} tras el enunciado, en lugar de un término se da una sucesión de instrucciones que van construyendo el término por nosotros.
 
-El modo táctico se entiende mejor con la noción de estado de la
-demostración, que el InfoView muestra en todo momento. Un estado consta de
-uno o varios objetivos (\emph{goals}); cada objetivo tiene un
-contexto de hipótesis con nombre (\lean{n : Nat}, \lean{h : p},
-\dots) y una meta, la proposición que falta demostrar, señalada con
-el símbolo $\vdash$. Cada táctica transforma el estado: puede simplificar la
-meta, añadir hipótesis, dividir el objetivo en varios o cerrarlo. La
-demostración acaba cuando no quedan objetivos y el InfoView muestra el
-mensaje ``\emph{Goals accomplished!}''.
+El modo táctico se entiende mejor con la noción de estado de la demostración, que el InfoView muestra en todo momento. Un estado consta de uno o varios objetivos (\emph{goals}); cada objetivo tiene un contexto de hipótesis con nombre (\lean{n : Nat}, \lean{h : p}, \dots) y una meta, la proposición que falta demostrar, señalada con el símbolo $\vdash$. Cada táctica transforma el estado: puede simplificar la meta, añadir hipótesis, dividir el objetivo en varios o cerrarlo. La demostración acaba cuando no quedan objetivos y el InfoView muestra el mensaje ``\emph{Goals accomplished!}''.
 
-Veámoslo con un ejemplo elemental: si $p$ es cierta, entonces $p$ se sigue
-de cualquier otra cosa. En los comentarios se indica el estado de la
-demostración antes y después de cada táctica, tal como lo mostraría el
-InfoView.
+Veámoslo con un ejemplo elemental: si $p$ es cierta, entonces $p$ se sigue de cualquier otra cosa. En los comentarios se indica el estado de la demostración antes y después de cada táctica, tal como lo mostraría el InfoView.
 
 \begin{lstlisting}
 example (p q : Prop) : p → (q → p) := by
@@ -351,31 +174,13 @@ example (p q : Prop) : p → (q → p) := by
   -- Goals accomplished!
 \end{lstlisting}
 
-La meta inicial es una implicación anidada. La táctica \lean{intro hp}
-supone el antecedente ---es el ``supongamos $p$'' de una demostración
-informal--- y lo añade al contexto con el nombre \lean{hp}, dejando como
-meta el consecuente; \lean{intro hq} hace lo propio con la segunda
-implicación. La meta es entonces $p$, que es exactamente la hipótesis
-\lean{hp}, y \lean{exact hp} la señala y cierra el objetivo. Estas dos
-tácticas, junto con el resto de las empleadas en el trabajo, se detallan en
-la sección \ref{sec:tacticas}.
+La meta inicial es una implicación anidada. La táctica \lean{intro hp} supone el antecedente, es el ``supongamos $p$'' de una demostración informal, y lo añade al contexto con el nombre \lean{hp}, dejando como meta el consecuente. \lean{intro hq} hace lo propio con la segunda implicación. La meta es entonces $p$, que es exactamente la hipótesis \lean{hp}, y \lean{exact hp} la señala y cierra el objetivo. Estas dos tácticas, junto con el resto de las empleadas en el trabajo, se detallan en la sección \ref{sec:tacticas}.
 
-Merece la pena subrayar la relación entre los dos modos: las tácticas no son
-una lógica aparte, sino un lenguaje de órdenes para construir el mismo
-término que podríamos escribir a mano. En el ejemplo, el término construido
-es \lean{fun hp hq => hp}. A lo largo del trabajo combinamos ambos estilos
-según cuál resulte más legible ---alguna demostración corta se escribe
-directamente como término, igual que el modus ponens de arriba---, con
-preferencia por el modo táctico con las hipótesis intermedias explícitas
-(\lean{have}), que es el que más se parece a una demostración escrita en
-prosa.
+Merece la pena subrayar la relación entre los dos modos: las tácticas no son una lógica aparte, sino un lenguaje de órdenes para construir el mismo término que podríamos escribir a mano. En el ejemplo, el término construido es \lean{fun hp hq => hp}. A lo largo del trabajo combinamos ambos estilos según cuál resulte más legible, alguna demostración corta se escribe directamente como término, igual que el \emph{modus ponens} de arriba, con preferencia por el modo táctico con las hipótesis intermedias explícitas (\lean{have}), que es el que más se parece a una demostración escrita en prosa.
 
 \section{Catálogo de tácticas empleadas}\label{sec:tacticas}
 
-Esta sección recoge todas las tácticas que aparecen en la
-formalización, agrupadas por función, con su significado matemático y una
-referencia a algún lugar del capítulo \ref{sec:formalizacion} donde se
-utilicen. La tabla \ref{tab:tacticas} sirve de resumen y de índice.
+Esta sección recoge todas las tácticas que aparecen en la formalización, agrupadas por función, con su significado matemático y una referencia a algún lugar del capítulo \ref{sec:formalizacion} donde se utilicen. La tabla \ref{tab:tacticas} sirve de resumen y de índice.
 
 \begin{table}[htb]
 \centering\small
@@ -385,206 +190,196 @@ Táctica & Lectura matemática & Uso destacado \\
 \midrule
 \lean{intro}       & sea\ldots / supongamos\ldots & en casi todos los lemas \\
 \lean{exact}       & que es exactamente\ldots & en casi todos los lemas \\
-\lean{apply}       & basta ver\ldots (razonar hacia atrás) & lema de verdad \\
+\lean{apply}       & basta ver\ldots (razonar hacia atrás) & lema de verdad (§\ref{subsec:comp-ver}) \\
 \lean{have}        & afirmación intermedia & regla RE (§\ref{sec:form-sistema}) \\
 \lean{rfl}         & por definición & \lean{satisfies_neg} (§\ref{sec:form-semantica}) \\
-\lean{constructor} & separar $\leftrightarrow$, $\wedge$ en partes & \lean{satisfies_dia} \\
-\lean{rintro}, \lean{rcases}, \lean{obtain} & descomponer hipótesis & Lindenbaum (§\ref{sec:form-completitud}) \\
-\lean{refine}      & esquema con huecos & lema de existencia \\
-\lean{by_contra}   & reducción al absurdo & completitud \\
-\lean{by_cases}    & distinción de casos clásica & propiedades de los MCS \\
-\lean{contradiction} & hipótesis contradictorias & tautologías del $\leftrightarrow$ \\
-\lean{induction ... with} & inducción (estructural o sobre derivaciones) & corrección, lema de verdad \\
-\lean{subst}       & sustituir usando una igualdad & teorema de deducción \\
-\lean{simp}        & simplificación automática & un único uso (§\ref{sec:form-completitud}) \\
+\lean{constructor} & separar $\leftrightarrow$, $\wedge$ en partes & \lean{satisfies_dia} (§\ref{sec:form-semantica}) \\
+\lean{rintro}, \lean{rcases}, \lean{obtain} & descomponer hipótesis & Lindenbaum (§\ref{subsec:comp-lind}) \\
+\lean{refine}      & esquema con huecos & lema de existencia (§\ref{subsec:comp-ver}) \\
+\lean{by_contra}   & reducción al absurdo & varios, completitud (§\ref{subsec:comp-fin}) \\
+\lean{by_cases}    & distinción de casos clásica & propiedades de los MCS (§\ref{subsec:comp-mod}) \\
+\lean{contradiction} & hipótesis contradictorias & tautologías del $\leftrightarrow$ (§\ref{sec:form-tautologias}) \\
+\lean{induction ... with} & inducción (estructural o sobre derivaciones) & corrección (§\ref{sec:form-correccion}), lema de verdad (§\ref{subsec:comp-ver}) \\
+\lean{subst}       & sustituir usando una igualdad & teorema de deducción (§\ref{subsec:comp-ded}) \\
+\lean{simp}        & simplificación automática & un único uso (§\ref{subsec:comp-ded}) \\
 \bottomrule
 \end{tabular}
-\caption{Resumen de las tácticas empleadas en la formalización.}
-\label{tab:tacticas}
+\caption{Resumen de las tácticas empleadas en la formalización.} \label{tab:tacticas}
 \end{table}
 
 \subsection{Tácticas básicas de manipulación de objetivos}
 
-\textbf{\lean{intro}.} Si la meta es una implicación \lean{p → q} o un
-universal \lean{∀ x, P x}, la táctica \lean{intro h} mueve el antecedente al
-contexto como nueva hipótesis \lean{h} (o introduce un \lean{x} genérico) y
-deja como meta el consecuente. Corresponde al ``supongamos que'' y al ``sea
-$x$ arbitrario'' del lenguaje matemático. Admite varios nombres seguidos:
-ante la meta \lean{⊢ p → q → p}, la táctica \lean{intro hp hq} deja el
-contexto con \lean{hp : p} y \lean{hq : q} y la meta \lean{⊢ p}. Es, con
-diferencia, la táctica más usada del trabajo: casi todas nuestras nociones
-(tautología, validez, consistencia) son cadenas de cuantificadores e
-implicaciones.
+\tactica{\lean{intro}} Si la meta es una implicación \lean{p → q} o un universal \lean{∀ x, P x}, la táctica \lean{intro h} mueve el antecedente al contexto como nueva hipótesis \lean{h} (o introduce un \lean{x} genérico) y deja como meta el consecuente. Corresponde al ``supongamos que'' y al ``sea $x$ arbitrario'' del lenguaje matemático. Admite varios nombres seguidos:
 
-\textbf{\lean{exact}.} Cierra la meta proporcionando un término que la
-demuestra, construido con las hipótesis disponibles. En el caso más simple
-el término es una hipótesis: con \lean{hp : p} y meta \lean{⊢ p}, basta
-\lean{exact hp}. Pero puede ser cualquier término del tipo adecuado: con
-\lean{h : p → q} y \lean{hp : p} ante la meta \lean{⊢ q}, se cierra con
-\lean{exact h hp}, aplicando la implicación a la hipótesis. En el trabajo
-aparece a menudo en esta segunda forma, encadenando varias aplicaciones en
-un solo término.
+\begin{lstlisting}
+-- ⊢ p → q → p
+intro hp hq
+-- hp : p,  hq : q
+-- ⊢ p
+\end{lstlisting}
 
-\textbf{\lean{apply}.} Razona hacia atrás: si \lean{h : p → q} y la meta es
-\lean{q}, la táctica \lean{apply h} reduce la meta a \lean{p} (``para ver
-$q$, por $h$ basta ver $p$''). Es la contrapartida de \lean{exact}: en lugar
-de dar el término completo de una vez, se avanza dejando pendiente lo que
-falta. La usamos, entre otros sitios, en el caso de la implicación del lema
-de verdad (sección \ref{sec:form-completitud}).
+Es, con diferencia, la táctica más usada del trabajo, ya que casi todas nuestras nociones (tautología, validez, consistencia) son cadenas de cuantificadores e implicaciones.
 
-\textbf{\lean{have}.} Introduce una afirmación intermedia con su propia
-demostración: \lean{have h : p := término} o bien
-\lean{have h : p := by ...}. Tras ella, \lean{h} queda disponible en el
-contexto como cualquier otra hipótesis. Es la táctica que estructura las
-demostraciones largas como sucesiones de pasos con nombre(``primero observamos\dots, de donde\dots''). La
-demostración de la regla RE en la sección \ref{sec:form-sistema} es el
-ejemplo más evidente: siete \lean{have} encadenados que se leen exactamente igual
-que la demostración en papel.
+\tactica{\lean{exact}} Cierra la meta proporcionando un término que la demuestra, construido con las hipótesis disponibles. En el caso más simple el término es una hipótesis: con \lean{hp : p} y meta \lean{⊢ p}, basta \lean{exact hp}. Pero puede ser cualquier término del tipo adecuado:
 
-\textbf{\lean{rfl}.} Cierra metas de la forma \lean{a = b} o \lean{a ↔ b}
-cuando ambos lados son definicionalmente iguales (sección
-\ref{sec:escribir-lean}): por ejemplo, la meta \lean{⊢ 2 + 2 = 4}, que se
-resuelve calculando. Que un lema se demuestre con \lean{rfl} aporta además información
-importante: significa que no hay contenido matemático nuevo, solo se despliegan
-definiciones. Lo veremos en \lean{satisfies_neg} y en varios casos de la
-inducción de \lean{cpl_eval_iff_satisfies}, en la sección
-\ref{sec:form-semantica}.
+\begin{lstlisting}
+-- h : p → q,  hp : p
+-- ⊢ q
+exact h hp
+\end{lstlisting}
+
+La implicación se aplica a la hipótesis y el término resultante cierra la meta. En el trabajo aparece a menudo en esta segunda forma, encadenando varias aplicaciones en un solo término.
+
+\tactica{\lean{apply}} Razona hacia atrás: reduce la meta al antecedente de una implicación ya disponible (``para ver $q$, por $h$ basta ver $p$'').
+
+\begin{lstlisting}
+-- h : p → q
+-- ⊢ q
+apply h
+-- ⊢ p
+\end{lstlisting}
+
+Es la contrapartida de \lean{exact}: en lugar de dar el término completo de una vez, se avanza dejando pendiente lo que falta. La usamos, entre otros sitios, en el caso de la implicación del lema de verdad (sección \ref{sec:form-completitud}).
+
+\tactica{\lean{have}} Introduce una afirmación intermedia con su propia demostración: \lean{have h : p := término} o bien \lean{have h : p := by ...} Tras ella, \lean{h} queda disponible en el contexto como cualquier otra hipótesis.
+
+\begin{lstlisting}
+-- h : p → q,  hp : p
+-- ⊢ r
+have hq : q := h hp
+-- h : p → q,  hp : p,  hq : q
+-- ⊢ r
+\end{lstlisting}
+
+Es la táctica que estructura las demostraciones largas como sucesiones de pasos con nombre (``primero observamos\dots, de donde\dots''). La demostración de la regla RE en la sección \ref{sec:form-sistema} es el ejemplo más evidente: siete \lean{have} encadenados que se leen exactamente igual que la demostración en papel.
+
+\tactica{\lean{rfl}} Cierra metas de la forma \lean{a = b} o \lean{a ↔ b} cuando ambos lados son definicionalmente iguales (sección \ref{sec:escribir-lean}), lo que se comprueba calculando:
+
+\begin{lstlisting}
+-- ⊢ 2 + 2 = 4
+rfl
+-- Goals accomplished!
+\end{lstlisting}
+
+Que un lema se demuestre con \lean{rfl} aporta además información importante: significa que no hay contenido matemático nuevo, solo se despliegan definiciones. Lo veremos en \lean{satisfies_neg} y en varios casos de la inducción de \lean{cpl_eval_iff_satisfies}, en la sección \ref{sec:form-semantica}.
 
 \subsection{Construir y descomponer estructuras lógicas}
 
-\textbf{\lean{constructor}.} Cuando la meta es una conjunción o un
-bicondicional, la divide en sus componentes, generando un objetivo por cada
-una: ante \lean{⊢ p ∧ q} deja los dos objetivos \lean{⊢ p} y \lean{⊢ q}, y
-ante \lean{⊢ p ↔ q}, las dos implicaciones. El InfoView los muestra como
-objetivos separados, para delimitar la
-demostración de cada uno. Alternativamente puede darse el término par
-directamente con el constructor anónimo (sección \ref{sec:tipos}): la
-demostración final del teorema de adecuación es, simplemente,
-\lean{⟨soundness, completeness⟩}.
+\tactica{\lean{constructor}} Cuando la meta es una conjunción o un bicondicional, la divide en sus componentes, generando un objetivo por cada una (ante \lean{⊢ p ↔ q}, las dos implicaciones):
 
-\textbf{\lean{rcases}, \lean{rintro}, \lean{obtain}.} Son las tácticas
-duales de \lean{constructor}: en lugar de dividir la meta, descomponen
-hipótesis compuestas mediante patrones. Con
-\lean{h : ∃ x, P x ∧ Q x}, la táctica \lean{rcases h with ⟨x, hP, hQ⟩}
-sustituye \lean{h} por el testigo \lean{x} y las dos componentes de la
-conjunción, \lean{hP : P x} y \lean{hQ : Q x}. Los patrones pueden anidarse
-tanto como haga falta. Con \lean{h : p ∨ q}, en cambio,
-\lean{rcases h with hp | hq} genera dos objetivos, uno por cada caso: la
-barra separa alternativas y los corchetes angulares agrupan componentes
-simultáneas. La táctica \lean{rintro} combina \lean{intro} con esta
-descomposición en un solo paso, y \lean{obtain} hace lo propio con el
-resultado de aplicar un teorema: \lean{obtain ⟨x, hP, hQ⟩ := teorema hip}
-aplica el teorema y descompone lo que devuelve. La lectura matemática es
-siempre la misma: ``sea $x$ el objeto que nos proporciona el teorema, con
-tales propiedades''. En el trabajo aparecen sobre todo al usar el lema de
-Lindenbaum y el lema de existencia (sección \ref{sec:form-completitud}).
+\begin{lstlisting}
+-- ⊢ p ∧ q
+constructor
+-- ⊢ p
+-- ⊢ q
+\end{lstlisting}
 
-\textbf{\lean{refine}.} Es un \lean{exact} con huecos: se escribe el
-esqueleto del término y se dejan \lean{?_} en las partes pendientes, que se
-convierten en nuevos objetivos. Ante la meta \lean{⊢ p ∧ q}, teniendo ya
-\lean{hp : p}, la táctica \lean{refine ⟨hp, ?_⟩} deja como único objetivo
-\lean{⊢ q}. Resulta ideal cuando la parte creativa, elegir el testigo de
-un existencial, es previa a las comprobaciones rutinarias, que es
-exactamente la situación del lema de existencia de la sección
-\ref{sec:form-completitud}.
+El InfoView los muestra como objetivos separados, para delimitar la demostración de cada uno. Alternativamente puede darse el término par directamente con el constructor anónimo (sección \ref{sec:tipos}). La demostración final del teorema de adecuación es, simplemente, \lean{⟨soundness, completeness⟩}.
+
+\tactica{\lean{rcases}, \lean{rintro}, \lean{obtain}} Son las tácticas duales de \lean{constructor}: en lugar de dividir la meta, descomponen hipótesis compuestas mediante patrones.
+
+\begin{lstlisting}
+-- h : ∃ x, P x ∧ Q x
+rcases h with ⟨x, hP, hQ⟩
+-- x : A,  hP : P x,  hQ : Q x
+\end{lstlisting}
+
+La táctica sustituye \lean{h} por el testigo \lean{x} y las dos componentes de la conjunción, y los patrones pueden anidarse tanto como haga falta. Con \lean{h : p ∨ q}, en cambio, \lean{rcases h with hp | hq} genera dos objetivos, uno por cada caso: la barra separa alternativas y los corchetes angulares agrupan componentes simultáneas. La táctica \lean{rintro} combina \lean{intro} con esta descomposición en un solo paso, y \lean{obtain} hace lo propio con el resultado de aplicar un teorema: \lean{obtain ⟨x, hP, hQ⟩ := teorema hip} aplica el teorema y descompone lo que devuelve. La lectura matemática es siempre la misma: ``sea $x$ el objeto que nos proporciona el teorema, con tales propiedades''. En el trabajo aparecen sobre todo al usar el lema de Lindenbaum y el lema de existencia (sección \ref{sec:form-completitud}).
+
+\tactica{\lean{refine}} Es un \lean{exact} con huecos: se escribe el esqueleto del término y se dejan \lean{?_} en las partes pendientes, que se convierten en nuevos objetivos.
+
+\begin{lstlisting}
+-- hp : p
+-- ⊢ p ∧ q
+refine ⟨hp, ?_⟩
+-- ⊢ q
+\end{lstlisting}
+
+Resulta ideal cuando la parte creativa, elegir el testigo de un existencial, es previa a las comprobaciones rutinarias, que es exactamente la situación del lema de existencia de la sección \ref{sec:form-completitud}.
 
 \subsection{Razonamiento clásico}
 
-\textbf{\lean{by_contra}.} Reducción al absurdo: para demostrar \lean{p}, la
-táctica \lean{by_contra h} añade la hipótesis \lean{h : ¬p} y cambia la meta
-a \lean{False}, de modo que basta llegar a una contradicción. Es un
-principio genuinamente clásico que equivale a la eliminación de la doble
-negación. Su papel en este trabajo es muy relevante: la propia
-demostración de completitud es una gran reducción al absurdo (sección
-\ref{sec:form-completitud}), y en pequeño aparece cada vez que hay que pasar
-de una negación a una afirmación, como en la inferencia
-$\lnot\forall x\, \lnot P(x) \Rightarrow \exists x\, P(x)$, que no es
-demostrable intuicionistamente. Volvemos sobre esta cuestión en la sección
-\ref{sec:mathlib}.
+\tactica{\lean{by_contra}} Reducción al absurdo: para demostrar \lean{p}, la táctica \lean{by_contra h} añade la hipótesis \lean{h : ¬p} y cambia la meta a \lean{False}, de modo que basta llegar a una contradicción.
 
-\textbf{\lean{by_cases}.} Distinción de casos sobre una proposición
-cualquiera: \lean{by_cases h : p} abre dos objetivos, uno con \lean{h : p} y
-otro con \lean{h : ¬p}. Es la herramienta natural para razonar por casos sin
-disponer de una disyunción previa: en el trabajo la usamos para las
-propiedades de los conjuntos maximales consistentes (sección
-\ref{sec:form-completitud}), del tipo ``o bien $\Gamma$ deduce $\varphi$, o
-bien no lo hace''.
+\begin{lstlisting}
+-- ⊢ p
+by_contra h
+-- h : ¬p
+-- ⊢ False
+\end{lstlisting}
 
-\textbf{\lean{contradiction}.} Cierra el objetivo cuando el contexto
-contiene una contradicción explícita: por ejemplo, \lean{h : p} junto con
-\lean{h' : ¬p}, o una hipótesis \lean{h : False}. En tal caso la meta, sea
-cual sea, queda demostrada.
+Es un principio genuinamente clásico que equivale a la eliminación de la doble negación. Por ejemplo, lo vemos en la demostración de completitud (sección \ref{sec:form-completitud}), y aparece puntualmente también cada vez que hay que pasar de una negación a una afirmación, como en la inferencia $\lnot\forall x\, \lnot P(x) \Rightarrow \exists x\, P(x)$, que no es demostrable intuicionistamente. Volvemos sobre esta cuestión en la sección \ref{sec:mathlib}.
 
-Relacionadas con lo anterior están dos funciones (no tácticas) que usamos
-para rematar razonamientos: \lean{False.elim h}, que a partir de
-\lean{h : False} demuestra cualquier cosa (\emph{ex falso quodlibet}), y
-\lean{absurd h h'}, que hace lo mismo a partir de \lean{h : p} y
-\lean{h' : ¬p}.
+\tactica{\lean{by_cases}} Distinción de casos sobre una proposición cualquiera, abriendo un objetivo por cada posibilidad:
+
+\begin{lstlisting}
+-- ⊢ q
+by_cases h : p
+-- caso 1:  h : p,   ⊢ q
+-- caso 2:  h : ¬p,  ⊢ q
+\end{lstlisting}
+
+Es la herramienta natural para razonar por casos sin disponer de una disyunción previa: en el trabajo la usamos para las propiedades de los conjuntos maximales consistentes (sección \ref{sec:form-completitud}), del tipo ``o bien $\Gamma$ deduce $\varphi$, o bien no lo hace''.
+
+\tactica{\lean{contradiction}} Cierra el objetivo cuando el contexto contiene una contradicción explícita, como \lean{h : p} junto con \lean{h' : ¬p} o una hipótesis \lean{h : False}. En tal caso la meta, sea cual sea, queda demostrada:
+
+\begin{lstlisting}
+-- h : p,  h' : ¬p
+-- ⊢ q
+contradiction
+-- Goals accomplished!
+\end{lstlisting}
+
+Relacionadas con lo anterior están dos funciones (no tácticas) que usamos para rematar razonamientos: \lean{False.elim h}, que a partir de \lean{h : False} demuestra cualquier cosa (\emph{ex falso quodlibet}), y \lean{absurd h h'}, que hace lo mismo a partir de \lean{h : p} y \lean{h' : ¬p}.
 
 \subsection{Inducción y reescritura}
 
-\textbf{\lean{induction ... with}.} Aplica el principio de inducción del
-tipo inductivo correspondiente, abriendo un objetivo por constructor; la
-sintaxis \lean{with | caso₁ ... | caso₂ ...} permite nombrar en cada caso
-los argumentos y las hipótesis de inducción. Un ejemplo con listas:
+\tactica{\lean{induction ... with}} Aplica el principio de inducción del tipo inductivo correspondiente, abriendo un objetivo por constructor; la sintaxis \lean{with | caso₁ ... | caso₂ ...} permite nombrar en cada caso los argumentos y las hipótesis de inducción. Un ejemplo con listas:
 
 \begin{lstlisting}
 def longitud {α : Type} : List α → Nat
   | []      => 0
   | _ :: xs => longitud xs + 1
 
-example {α : Type} (l : List α) : longitud (l ++ []) = longitud l := by
+example {α β : Type} (f : α → β) (l : List α) :
+    longitud (l.map f) = longitud l := by
   induction l with
-  | nil           => rfl
-  | cons x xs ih  => rw [List.cons_append, longitud, longitud, ih]
+  | nil          => rfl
+  | cons x xs ih => simp [longitud, ih]
 \end{lstlisting}
 
-El tipo \lean{List α} tiene dos constructores: la lista vacía \lean{[]} y la
-que antepone un elemento a otra lista, \lean{x :: xs}. La inducción abre por
-tanto dos objetivos: el caso \lean{nil}, que es la base y aquí se cierra de forma inmediata con \lean{rfl}, y el caso \lean{cons}, que recibe el elemento \lean{x}, la cola
-\lean{xs} y la hipótesis de inducción \lean{ih}, que afirma la propiedad
-para \lean{xs}. Lo mismo ocurre con cualquier otro tipo inductivo: hay un
-caso por constructor, y los constructores recursivos vienen acompañados de
-su hipótesis de inducción.
+El tipo \lean{List α} tiene dos constructores: la lista vacía \lean{[]} y la que antepone un elemento a otra lista, \lean{x :: xs}. La inducción abre por tanto dos objetivos: el caso \lean{nil}, que es la base y aquí se cierra de forma inmediata con \lean{rfl}; y el caso \lean{cons}, que recibe el elemento \lean{x}, la cola \lean{xs} y la hipótesis de inducción \lean{ih}, que afirma la propiedad para \lean{xs}. Lo mismo ocurre con cualquier otro tipo inductivo: hay un caso por constructor, y los constructores recursivos vienen acompañados de su hipótesis de inducción.
+
+En este trabajo la inducción se aplica sobre dos clases de objetos bien distintas, y conviene separarlas desde el principio:
 
 \begin{itemize}
-  \item \emph{Inducción estructural sobre fórmulas} (tipo
-        \lean{ModalFormula}): los casos son los cuatro constructores
-        ---átomo, $\bot$, implicación y caja---, y los dos últimos traen
-        hipótesis de inducción sobre las subfórmulas. Así se demuestran el
-        lema puente de la corrección y el lema de verdad (secciones
-        \ref{sec:form-correccion} y \ref{sec:form-completitud}).
-  \item \emph{Inducción sobre derivaciones} (tipos \lean{Provable} y
-        \lean{DeducibleFrom}): como una demostración formal es también un
-        objeto inductivo, se puede razonar ``por inducción sobre la
-        demostración'', con un caso por axioma o regla. De especial relevancia para la corrección, el teorema de
-        deducción y la monotonía de la deducibilidad.
-  \item Con el modificador \lean{generalizing}: cuando la propiedad que se
-        demuestra por inducción depende de otra variable que cambia dentro
-        de los casos, esa variable debe generalizarse antes de inducir, o
-        las hipótesis de inducción quedarán fijadas a su valor actual y no
-        servirán. Escribir \lean{induction x generalizing y} lo consigue. Es
-        el análogo formal de la precaución, habitual en papel, de enunciar
-        la hipótesis de inducción ``para todo $y$''. En el lema de verdad
-        resulta imprescindible, y allí explicamos por qué (sección
-        \ref{sec:form-completitud}).
+  \item \emph{Inducción estructural sobre fórmulas} (tipo \lean{ModalFormula}): los casos son los cuatro constructores, átomo, $\bot$, implicación y caja, y los dos últimos traen hipótesis de inducción sobre las subfórmulas. Así se demuestran el lema puente de la corrección y el lema de verdad (secciones \ref{sec:form-correccion} y \ref{sec:form-completitud}).
+  \item \emph{Inducción sobre derivaciones} (tipos \lean{Provable} y \lean{DeducibleFrom}): como una demostración formal es también un objeto inductivo, se puede razonar ``por inducción sobre la demostración'', con un caso por axioma o regla. Usada para la corrección, el teorema de deducción y la monotonía de la deducibilidad.
 \end{itemize}
 
-\textbf{\lean{subst}.} Dada una hipótesis de igualdad \lean{heq : x = a},
-elimina \lean{x} sustituyéndolo por \lean{a} en la meta y en las demás
-hipótesis, y descarta la igualdad. Es lo que en papel se hace al decir
-``pero entonces $x$ es $a$'', y se usa cuando una distinción de casos
-ha dejado como hipótesis la identidad de dos objetos que se trataban por
-separado.
+\tactica{\lean{induction ... generalizing}} Cuando la propiedad que se demuestra por inducción depende de otra variable que cambia dentro de los casos, esa variable debe generalizarse antes de hacer la inducción, o las hipótesis quedarán fijadas a su valor actual y no servirán. Escribir \lean{induction x generalizing y} lo consigue. Es el análogo formal de la práctica habitual en papel de enunciar la hipótesis de inducción ``para todo $y$''. En el lema de verdad resulta imprescindible, y allí explicamos por qué (sección \ref{sec:form-completitud}).
 
-\textbf{\lean{simp}.} Es la principal táctica de automatización de Lean:
-reescribe la meta (o una hipótesis, con \lean{simp at h}) usando una base de
-ecuaciones marcadas como reglas de simplificación, y cierra el objetivo si
-llega a algo trivial. Es muy cómoda pero tiene un precio: oculta los pasos que da,
-de modo que su uso indiscriminado produce demostraciones cortas pero
-ilegibles. Por eso en este trabajo, aparece una única vez y en un papel muy concreto: para descartar una hipótesis imposible, la pertenencia de una
-fórmula al conjunto vacío (sección \ref{sec:form-completitud}). Todo lo
-demás está demostrado de forma explícita.
+\tactica{\lean{subst}} Dada una hipótesis de igualdad \lean{heq : x = a}, elimina \lean{x} sustituyéndolo por \lean{a} en la meta y en las demás hipótesis, y descarta la igualdad.
+
+\begin{lstlisting}
+-- heq : x = a,  h : P x
+-- ⊢ Q x
+subst heq
+-- h : P a
+-- ⊢ Q a
+\end{lstlisting}
+
+Es lo que en papel se hace al decir ``pero entonces $x$ es $a$''. Aparece una única vez, en el teorema de deducción: al descomponer la pertenencia de una fórmula a \lean{insert φ Γ}, uno de los dos casos deja como hipótesis que dicha fórmula es \lean{φ}, y \lean{subst} la elimina (subsección \ref{subsec:comp-ded}).
+
+\tactica{\lean{simp}} Es la principal táctica de automatización de Lean: reescribe la meta (o una hipótesis, con \lean{simp at h}) usando una base de ecuaciones marcadas como reglas de simplificación, y cierra el objetivo si llega a algo trivial. Es muy cómoda pero tiene un precio: oculta los pasos que da, de modo que su uso indiscriminado produce demostraciones cortas pero ilegibles. Por eso en este trabajo aparece una única vez, para descartar una hipótesis imposible (subsección \ref{subsec:comp-ded}):
+
+\begin{lstlisting}
+-- h : φ ∈ (∅ : Set (ModalFormula VP))
+simp at h
+-- Goals accomplished!
+\end{lstlisting}
+
+La hipótesis afirma que una fórmula pertenece al conjunto vacío; \lean{simp} la reduce a \lean{False} y cierra el objetivo.
 
 \section{Mathlib, la lógica clásica y el lema de Zorn}\label{sec:mathlib}
 
@@ -595,52 +390,19 @@ import Mathlib.Tactic
 import Mathlib.Order.Zorn
 \end{lstlisting}
 
-La primera carga el modo táctico extendido de Mathlib; la segunda, el lema
-de Zorn. De Mathlib usamos tres cosas, que repasamos a continuación.
+La primera carga el modo táctico extendido de Mathlib; la segunda, el lema de Zorn. De Mathlib usamos tres cosas, que repasamos a continuación.
 
-\vspace{3mm}
+\subsection*{Conjuntos}
 
-\underline{Conjuntos}
+El tipo \lean{Set α} representa los subconjuntos de un tipo \lean{α}; técnicamente, un conjunto es su función característica, \lean{Set α := α → Prop}, y \lean{x ∈ A} es la proposición \lean{A x}. Sobre él están definidos \lean{⊆}, \lean{∪}, \lean{∅}, la inserción de un elemento \lean{insert a A} (que usamos constantemente para ``añadir una fórmula a un conjunto de hipótesis'') y la unión de una familia, \lean{⋃₀ C} (notación para \lean{Set.sUnion C}, la unión de todos los conjuntos que pertenecen a la colección \lean{C}). De la biblioteca tomamos lemas elementales de manipulación cuyo nombre describe su contenido: \lean{Set.mem_insert} ($a \in \mathrm{insert}\ a\ A$), \lean{Set.mem_insert_iff} ($x \in \mathrm{insert}\ a\ A \leftrightarrow x = a \lor x \in A$), \lean{Set.subset_insert}, \lean{Set.mem_insert_of_mem}, \lean{Set.mem_sUnion} y \lean{Set.subset_sUnion_of_mem}. Aprender a encontrar estos lemas (por su nomenclatura sistemática, con la búsqueda del editor o con herramientas como \lean{exact?}) ha sido parte del aprendizaje de Lean.
 
-El tipo \lean{Set α} representa los subconjuntos de un
-tipo \lean{α}; técnicamente, un conjunto es su función
-característica, \lean{Set α := α → Prop}, y \lean{x ∈ A} es la proposición
-\lean{A x}. Sobre él están definidos \lean{⊆}, \lean{∪}, \lean{∅}, la
-inserción de un elemento \lean{insert a A} (que usamos constantemente para
-``añadir una fórmula a un conjunto de hipótesis'') y la unión de una familia
-\lean{⋃₀ C} (unión de todos los conjuntos que pertenecen a la colección
-\lean{C}). De la biblioteca tomamos lemas elementales de manipulación cuyo
-nombre describe su contenido: \lean{Set.mem_insert} ($a \in
-\mathrm{insert}\ a\ A$), \lean{Set.mem_insert_iff} ($x \in \mathrm{insert}\
-a\ A \leftrightarrow x = a \lor x \in A$), \lean{Set.subset_insert},
-\lean{Set.mem_insert_of_mem}, \lean{Set.mem_sUnion} y
-\lean{Set.subset_sUnion_of_mem}. Aprender a encontrar estos lemas
-(por su nomenclatura sistemática, con la búsqueda del editor o con
-herramientas como \lean{exact?}) ha sido parte del aprendizaje de Lean.
+\subsection*{Lógica clásica}
 
-\vspace{3mm}
+El núcleo de Lean es constructivo: por defecto no se dispone del principio del tercero excluido. Mathlib, como la práctica matemática habitual, trabaja en lógica clásica, axiomatizada mediante \lean{Classical.choice}; de ahí derivan el tercero excluido y las tácticas \lean{by_contra} y \lean{by_cases} que acabamos de describir. Nuestro desarrollo es clásico, igual que el texto de referencia \cite{blackburn}. La propia semántica evalúa cada fórmula a verdadera o falsa, la eliminación de la doble negación es una de nuestras tautologías básicas, y la completitud usa el lema de Zorn, equivalente al axioma de elección. No es una limitación de Lean, sino una elección, puesto que sí existe una lógica modal intuicionista, pero no es el objeto de este trabajo.
 
-\underline{Lógica clásica}
+\subsection*{El lema de Zorn}
 
-El núcleo de Lean es constructivo: por defecto no
-se dispone del tercero excluido. Mathlib, como la práctica matemática
-habitual, trabaja en lógica clásica, axiomatizada mediante
-\lean{Classical.choice}; de ahí derivan el tercero excluido y las tácticas
-\lean{by_contra} y \lean{by_cases} que acabamos de describir. Nuestro
-desarrollo es clásico sin complejos, igual que el texto de referencia
-\cite{blackburn}: la propia semántica evalúa cada fórmula a verdadera o
-falsa, la eliminación de la doble negación es una de nuestras tautologías
-básicas, y la completitud usa el lema de Zorn, equivalente al axioma de
-elección. No es una limitación de Lean, sino una elección: existe una
-lógica modal intuicionista, pero no es el objeto de este trabajo.
-
-\vspace{3mm}
-
-\underline{El lema de Zorn}
-
-Del orden por inclusión entre conjuntos, Mathlib
-ofrece la siguiente versión del lema de Zorn, que es la que aplicaremos en
-el lema de Lindenbaum (sección \ref{sec:form-completitud}):
+Del orden por inclusión entre conjuntos, Mathlib ofrece la siguiente versión del lema de Zorn, que es la que aplicaremos en el lema de Lindenbaum (sección \ref{sec:form-completitud}):
 
 \begin{lstlisting}
 theorem zorn_subset_nonempty (S : Set (Set α))
@@ -650,17 +412,8 @@ theorem zorn_subset_nonempty (S : Set (Set α))
     ∃ m, x ⊆ m ∧ Maximal (· ∈ S) m
 \end{lstlisting}
 
-Leído con calma: \lean{S} es una familia de conjuntos. La hipótesis \lean{H}
-pide que toda cadena no vacía \lean{c} contenida en \lean{S}, (esto
-es, toda subfamilia totalmente ordenada por $\subseteq$, que es lo que
-expresa \lean{IsChain (· ⊆ ·) c}, donde \lean{(· ⊆ ·)} es la notación
-anónima de Lean para la relación de inclusión) tenga una cota superior
-dentro de \lean{S}, La conclusión da, para cada \lean{x ∈ S}, un
-elemento \lean{m} de la familia con \lean{x ⊆ m} que es maximal en ella.
+Leído con calma: \lean{S} es una familia de conjuntos. La hipótesis \lean{H} pide que toda cadena no vacía \lean{c} contenida en \lean{S} tenga una cota superior dentro de \lean{S}\footnote{Que \lean{c} sea una cadena, esto es, una subfamilia totalmente ordenada por $\subseteq$, es lo que expresa \lean{IsChain (· ⊆ ·) c}. La notación \lean{(· ⊆ ·)} es una función anónima abreviada: el punto medio marca los huecos de los argumentos, de modo que equivale a \lean{fun a b => a ⊆ b}.}. La conclusión da, para cada \lean{x ∈ S}, un elemento \lean{m} de la familia con \lean{x ⊆ m} que es maximal en ella.
 
-El argumento \lean{x} se declara sin indicar sutipo, \lean{(x)}: Lean lo deduce de la hipótesis \lean{hx : x ∈ S}, que obliga a que sea un \lean{Set α}. A su vez, la maximalidad se expresa con el predicado \lean{Maximal (· ∈ S) m}, que significa que \lean{m} cumple la propiedad de pertenecer a \lean{S} y que ningún elemento que la cumpla lo contiene estrictamente, De él extraeremos las dos piezas que necesitamos con
-\lean{.1} y \lean{.2}, la pertenencia y la maximalidad propiamente dicha.
+El argumento \lean{x} se declara sin indicar su tipo, y Lean lo deduce de la hipótesis \lean{hx : x ∈ S}, que obliga a que sea un \lean{Set α}. A su vez, la maximalidad se expresa con el predicado \lean{Maximal (· ∈ S) m}, que significa que \lean{m} cumple la propiedad de pertenecer a \lean{S} y que ningún elemento que la cumpla lo contiene estrictamente. De él extraeremos las dos piezas que necesitamos con \lean{.1} y \lean{.2}, la pertenencia y la maximalidad propiamente dicha.
 
-En nuestro caso \lean{S} será la familia de los conjuntos
-consistentes de fórmulas y la cota superior de una cadena, su unión. El trabajo matemático consistirá en demostrar que esa unión sigue siendo
-consistente.
+En nuestro caso \lean{S} será la familia de los conjuntos consistentes de fórmulas y la cota superior de una cadena, su unión. El trabajo matemático consistirá en demostrar que esa unión sigue siendo consistente.
