@@ -3,76 +3,48 @@
 % =====================================================================
 \chapter{La lógica modal \texorpdfstring{$\K$}{K}}\label{sec:logicamodal}
 
-Este capítulo contiene la parte matemática del trabajo en su versión ``de
-papel'': la sintaxis del lenguaje modal básico, el sistema axiomático $\K$,
-la semántica de Kripke y los enunciados de corrección y completitud, junto
-con el mapa de la demostración de esta última. Todo ello sigue en lo
-esencial a Blackburn, de Rijke y Venema \cite{blackburn}, con las
-adaptaciones, que iremos señalando, que conviene hacer pensando en la
-formalización del capítulo \ref{sec:formalizacion}.
+Este capítulo contiene la parte matemática del trabajo en su versión ``de papel'': la sintaxis del lenguaje modal básico, el sistema axiomático $\K$, la semántica de Kripke y los enunciados de corrección y completitud, junto con el mapa de la demostración de esta última. Todo ello sigue en lo esencial a Blackburn, de Rijke y Venema \cite{blackburn}, con las adaptaciones, que iremos señalando, que conviene hacer pensando en la formalización del capítulo \ref{sec:formalizacion}.
 
 \section{¿Necesidad y posibilidad?}
 
-La lógica proposicional clásica trata cada enunciado como verdadero o
-falso, sin matices. Pero el lenguaje natural distingue \emph{modos} de
-verdad: no es lo mismo ``llueve'' que ``necesariamente llueve'' o que
-``es posible que llueva''. La lógica modal introduce dos operadores para
-capturar esa distinción: $\nec\varphi$ (``$\varphi$ es necesaria'') y
-$\pos\varphi$ (``$\varphi$ es posible''). Ambos están ligados por una
-dualidad esperable: algo es posible exactamente cuando su negación no es
-necesaria, $\pos\varphi \equiv \lnot\nec\lnot\varphi$. En nuestro ejemplo de lluvia, ``es posible que llueva'' es lo mismo que ``no es necesario que no llueva''.
+La lógica proposicional clásica trata cada enunciado como verdadero o falso, sin matices. Pero el lenguaje natural distingue \emph{modos} de verdad. No es lo mismo ``llueve'' que ``necesariamente llueve'' o que ``es posible que llueva''. La lógica modal introduce dos operadores para capturar esa distinción: $\nec\varphi$ (``$\varphi$ es necesaria'') y $\pos\varphi$ (``$\varphi$ es posible''). Ambos están ligados por una dualidad esperable. Algo es posible exactamente cuando su negación no es necesaria, $\pos\varphi \equiv \lnot\nec\lnot\varphi$. En nuestro ejemplo de lluvia, ``es posible que llueva'' es lo mismo que ``no es necesario que no llueva''.
 
-Parte del atractivo de la lógica modal es que la lectura de los operadores
-no está fijada. Según la aplicación, un mismo par $\nec$, $\pos$ admite
-interpretaciones muy distintas:
+Parte del atractivo de la lógica modal es que la lectura de los operadores no está fijada. Según la aplicación, un mismo par $\nec$, $\pos$ admite lecturas muy distintas:
 
-\begin{itemize}
-  \item \textbf{Modalidad alética}, la lectura clásica: $\nec\varphi$ es
-        ``$\varphi$ es necesariamente cierta'' y $\pos\varphi$, ``$\varphi$
-        es posible''.
-  \item \textbf{Lógica epistémica}: $\nec\varphi$ es ``se sabe que
-        $\varphi$'' y $\pos\varphi$, ``$\varphi$ es compatible con lo que se
-        sabe'', es decir, no puede descartarse. Los operadores suelen
-        escribirse entonces $K\varphi$ y $\widehat{K}\varphi$.
-  \item \textbf{Lógica temporal}: $\nec\varphi$ es ``$\varphi$ será siempre
-        cierta en el futuro'' y $\pos\varphi$, ``$\varphi$ será cierta en
-        algún momento''.
-  \item \textbf{Lógica deóntica}: $\nec\varphi$ es ``$\varphi$ es
-        obligatoria'' y $\pos\varphi$, ``$\varphi$ está permitida''.
-\end{itemize}
+\begin{table}[htb]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+Lectura & $\nec\varphi$ & $\pos\varphi$\\
+\midrule
+Alética (la clásica) & $\varphi$ es necesaria & $\varphi$ es posible\\
+Epistémica & $\varphi$ se sabe & $\varphi$ no se sabe falsa\\
+Temporal & $\varphi$ será siempre cierta & $\varphi$ será cierta alguna vez\\
+Deóntica & $\varphi$ es obligatoria & $\varphi$ está permitida\\
+\bottomrule
+\end{tabular}
+\caption{Cuatro lecturas habituales del par $\nec$, $\pos$. En la temporal se cuantifica sobre los instantes futuros; en la epistémica, $\pos\varphi$ equivale a ``$\varphi$ es compatible con lo que se sabe'' y los operadores suelen escribirse $K\varphi$ y $\widehat{K}\varphi$.}
+\label{tab:lecturas}
+\end{table}
 
-En todos los casos la dualidad se mantiene, y resulta iluminadora: lo
-permitido es lo que no está prohibido, lo compatible con el conocimiento es
-lo que no se sabe falso, lo que ocurrirá alguna vez es lo que no siempre
-será falso. Cada lectura sugiere, en cambio, principios distintos: por
-ejemplo, ``lo sabido es cierto'' ($\nec\varphi \limp \varphi$) es razonable
-para el conocimiento, y también para el tiempo si se admite el instante
-presente, pero no para la obligación (que algo sea obligatorio no lo hace
-cierto). Esta multiplicidad explica que exista toda una familia de lógicas
-modales.
+En todos los casos la dualidad se mantiene: lo permitido es lo que no está prohibido, lo compatible con el conocimiento es lo que no se sabe falso, lo que ocurrirá alguna vez es lo que no siempre será falso. Cada lectura sugiere, en cambio, principios distintos. Por ejemplo, ``lo sabido es cierto'' ($\nec\varphi \limp \varphi$) es razonable para el conocimiento, y también para el tiempo si se admite el instante presente, pero no para la obligación (que algo sea obligatorio no lo hace cierto). Esta multiplicidad explica que exista toda una familia de lógicas modales.
 
-La que estudiamos aquí, la lógica $\K$ (por Kripke), es la base
-común y más débil de todas ellas: no compromete ninguna lectura y sirve de
-punto de partida para las demás, que se obtienen añadiendo axiomas. La
-lectura epistémica reaparecerá en el capítulo \ref{sec:muddy} AAA.
+La que estudiamos aquí, la lógica $\K$ (por Kripke), es la base común y más débil de todas ellas. No compromete ninguna lectura y sirve de punto de partida para las demás, que se obtienen añadiendo nuevos axiomas. La lectura epistémica reaparecerá en el capítulo \ref{sec:muddy} AAA.
 
 \section{Sintaxis}\label{sec:sintaxis-mat}
 
 \begin{definicion}[Lenguaje modal básico]\label{def:lenguaje}
-Fijado un conjunto $\mathrm{VP}$ de \emph{variables proposicionales}, las
-\emph{fórmulas modales} se definen por la siguiente gramática:
+Fijado un conjunto $\mathsf{VP}$ de \emph{variables proposicionales}, el conjunto $\mathsf{Form}$ de \emph{fórmulas modales} se define por la siguiente gramática:
 \[
   \varphi ::= p \mid \bot \mid \varphi \limp \varphi \mid \nec\varphi,
-  \qquad p \in \mathrm{VP}.
+  \qquad p \in \mathsf{VP}.
 \]
-Es decir, el conjunto $\mathrm{Form}$ de fórmulas es el menor conjunto que contiene
-las variables y la constante $\bot$ (``falso'') y está cerrado por la
-implicación y por el operador $\nec$.
+Es decir, $\mathsf{Form}$ es el menor conjunto que contiene las variables y la constante $\bot$ (``falso'') y está cerrado bajo la implicación y bajo el operador $\nec$.
 \end{definicion}
 
-Adoptamos deliberadamente un lenguaje primitivo mínimo: solo $\bot$,
-$\limp$ y $\nec$. El resto de conectivas se introducen como
-abreviaturas:
+Fijamos también la convención de nombres que seguirá todo el trabajo: las letras latinas minúsculas $p$, $q$, $r$ denotan siempre variables proposicionales, es decir, elementos de $\mathsf{VP}$, mientras que las griegas minúsculas $\varphi$, $\psi$, $\chi$ (y ocasionalmente $\alpha$, $\beta$) denotan fórmulas cualesquiera. La distinción no es cosmética: $\nec p \limp p$ es una fórmula concreta, mientras que $\nec\varphi \limp \varphi$ es un esquema, con una instancia por cada fórmula $\varphi$, y veremos en la sección \ref{sec:sistemaK} que hay propiedades de la primera que no comparten todas las instancias del segundo.
+
+Adoptamos deliberadamente un lenguaje primitivo mínimo, formado solo por $\bot$, $\limp$ y $\nec$. El resto de conectivas se introducen como abreviaturas:
 \[
 \begin{array}{rclcrcl}
   \top &:=& \bot \limp \bot, &\qquad&
@@ -83,169 +55,89 @@ abreviaturas:
   \pos\varphi &:=& \lnot\nec\lnot\varphi.
 \end{array}
 \]
-Las definiciones de $\lor$ y $\land$ son las clásicas: $\varphi \lor \psi$
-dice ``si no $\varphi$, entonces $\psi$'', y $\varphi \land \psi$ niega que
-$\varphi$ implique la negación de $\psi$. La ventaja de trabajar con un
-lenguaje mínimo es doble. En el plano matemático, las definiciones y
-demostraciones por inducción estructural tienen solo cuatro casos. En el
-plano de la formalización, cada constructor del tipo de fórmulas es un caso
-en cada demostración: menos primitivas significa menos casos que demostrar,
-y las conectivas derivadas reciben su significado ``gratis'', como
-comprobaremos en la sección \ref{sec:form-semantica}.
+Las definiciones de $\lor$ y $\land$ son las clásicas. La fórmula $\varphi \lor \psi$ dice ``si no $\varphi$, entonces $\psi$'', y $\varphi \land \psi$ niega que $\varphi$ implique la negación de $\psi$. La ventaja de trabajar con un lenguaje mínimo es que las definiciones y demostraciones por inducción estructural tienen solo cuatro casos. Además, en la formalización, cada constructor del tipo de fórmulas es un caso en cada demostración, y menos primitivas significa menos casos que demostrar. Las conectivas derivadas reciben además su significado ``gratis'', como comprobaremos en la sección \ref{sec:form-semantica}.
 
-Esta es la primera de las adaptaciones. Blackburn, de Rijke y
-Venema \cite[Def.~1.9]{blackburn} toman como primitivos $\bot$, $\lnot$,
-$\lor$ y $\pos$, y es $\nec$ el que se define, como
-$\nec\varphi := \lnot\pos\lnot\varphi$; la implicación es allí la
-abreviatura $\varphi \limp \psi := \lnot\varphi \lor \psi$. Nosotros
-invertimos la elección: $\nec$ es primitivo y $\pos$ es la abreviatura.
-Ambos lenguajes son intertraducibles (cada fórmula de uno se reescribe en
-el otro sin alterar su significado respecto a la semántica de la sección
-\ref{sec:kripke-mat}), y los propios autores reconocen que su preferencia
-por $\pos$ obedece a la comodidad para el trabajo algebraico de capítulos
-posteriores del libro. Pensando en la formalización, $\nec$ es la opción
-natural: su cláusula semántica es una cuantificación universal, más cómoda
-de manejar en un asistente de demostración que la existencial de $\pos$
-(sección \ref{sec:form-semantica}). La misma elección hace innecesario uno
-de los axiomas del sistema de Blackburn, como veremos en la sección
-\ref{sec:sistemaK}.
+Esta es la primera de las adaptaciones. Blackburn, de Rijke y Venema \cite[Def.~1.9]{blackburn} toman como primitivos $\bot$, $\lnot$, $\lor$ y $\pos$, y es $\nec$ el que se define, como $\nec\varphi := \lnot\pos\lnot\varphi$; la implicación es allí la abreviatura $\varphi \limp \psi := \lnot\varphi \lor \psi$. Nosotros invertimos la elección. Ambos lenguajes son intertraducibles (cada fórmula de uno se reescribe en el otro sin alterar su significado respecto a la semántica de la sección \ref{sec:kripke-mat}), y los propios autores reconocen que su preferencia por $\pos$ obedece a la comodidad para el trabajo algebraico de capítulos posteriores del libro. Pensando en la formalización, $\nec$ es la opción natural, porque su cláusula semántica es una cuantificación universal, más cómoda de manejar en un asistente de demostración que la existencial de $\pos$ (sección \ref{sec:form-semantica}). La misma elección hace innecesario uno de los axiomas del sistema de Blackburn, como veremos en la sección \ref{sec:sistemaK}.
 
-Obsérvese también que no imponemos ninguna condición sobre el conjunto
-$\mathrm{VP}$. Blackburn \cite[p.~10]{blackburn} lo supone habitualmente
-numerable, hipótesis que interviene en su demostración del lema de
-Lindenbaum; nosotros podremos prescindir de ella (sección
-\ref{sec:mapa-completitud}, paso 3).
-
-Como es habitual, la inducción (y la recursión) estructural sobre
-fórmulas será nuestra herramienta básica: para probar que toda fórmula tiene
-una propiedad basta verla para $p$ y $\bot$, y verla para
-$\varphi \limp \psi$ y $\nec\varphi$ supuesta para las subfórmulas.
+Obsérvese también que no imponemos ninguna condición sobre el conjunto $\mathsf{VP}$. Blackburn \cite[p.~10]{blackburn} lo supone habitualmente numerable, hipótesis que interviene en su demostración del lema de Lindenbaum; nosotros podremos prescindir de ella (sección \ref{sec:mapa-completitud}, paso 3).
 
 \section{El sistema axiomático \texorpdfstring{$\K$}{K}}\label{sec:sistemaK}
 
-Un sistema axiomático determina qué
-fórmulas son demostrables a partir de unos axiomas mediante unas
-reglas de inferencia. El sistema $\K$ toma como punto de partida todo el
-cálculo proposicional clásico y le añade lo mínimo para razonar con $\nec$.
+Un sistema axiomático determina qué fórmulas son demostrables a partir de unos axiomas mediante unas reglas de inferencia. El sistema $\K$ toma como punto de partida todo el cálculo proposicional clásico y le añade lo mínimo para razonar con $\nec$. Precisamos primero ese punto de partida.
+
+\begin{definicion}[Tautología clásica]\label{def:tautologia}
+Una \emph{valoración booleana} es un par de funciones $v = (v_a, v_\nec)$, con $v_a \colon \mathsf{VP} \to \{0,1\}$ y $v_\nec \colon \mathsf{Form} \to \{0,1\}$, que asignan valores de verdad ($1$ verdadero, $0$ falso) a las variables y a las fórmulas encajonadas: $v_a(p)$ es el valor de la variable $p$, y $v_\nec(\psi)$, el de la fórmula $\nec\psi$. Fijada una valoración, toda fórmula recibe un valor $\hat{v}(\varphi)$ por recursión:
+\[
+\begin{array}{lcl}
+  \hat{v}(p) &=& v_a(p),\\[2pt]
+  \hat{v}(\bot) &=& 0,\\[2pt]
+  \hat{v}(\varphi \limp \psi) &=&
+    \begin{cases}
+      0 & \text{si } \hat{v}(\varphi) = 1 \text{ y } \hat{v}(\psi) = 0,\\
+      1 & \text{en otro caso},
+    \end{cases}\\[14pt]
+  \hat{v}(\nec\psi) &=& v_\nec(\psi).
+\end{array}
+\]
+Una fórmula $\varphi$ es una \emph{tautología clásica} si $\hat{v}(\varphi) = 1$ para toda valoración booleana $v$.
+\end{definicion}
+
+Esta manera de evaluar significa que, a efectos proposicionales, cada subfórmula $\nec\psi$ es un \emph{átomo opaco}. Átomo, porque la valoración le asigna un valor de verdad directamente, igual que a una variable, en lugar de descomponerla; opaco, porque la última cláusula no evalúa $\psi$, de modo que el valor de $\nec\psi$ es independiente de lo que haya dentro de la caja. Por ejemplo, $\nec\nec p \limp \nec p$ no es una tautología clásica: los átomos opacos $\nec\nec p$ y $\nec p$ son fórmulas distintas, y cualquier valoración con $v_\nec(\nec p) = 1$ y $v_\nec(p) = 0$ la hace falsa. La definición \ref{def:tautologia} coincide con la formalización desarrollada en el Capítulo \ref{sec:formalizacion}. $v_a$ y $v_\nec$ son los argumentos \lean{v_atom} y \lean{v_box} de la función \lean{cplEval} del código, que computa $\hat{v}$.
+
+Conviene contrastar dos casos. La fórmula $\nec\psi \limp \nec\psi$ es una tautología clásica para cualquier $\psi$, pues su átomo opaco recibe el mismo valor a los dos lados de la implicación; en cambio $\nec p \limp p$ no lo es, porque cualquier valoración con $v_\nec(p) = 1$ y $v_a(p) = 0$ la hace falsa. Aquí es esencial la convención de la sección \ref{sec:sintaxis-mat}: $\nec p \limp p$ es una fórmula concreta, con $p$ una variable, mientras que el esquema $\nec\varphi \limp \varphi$ sí tiene instancias que son tautologías clásicas, como $\nec\top \limp \top$, verdadera bajo toda valoración porque ninguna hace falsa $\top$.
+
+La formulación habitual en la literatura es otra. Recordemos que una \emph{tautología proposicional} es una fórmula del fragmento sin $\nec$ de nuestro lenguaje, construida solo con variables, $\bot$ y $\limp$, verdadera bajo toda asignación de valores de verdad a sus variables, y que una \emph{instancia} suya se obtiene reemplazando uniformemente cada variable por una fórmula modal cualquiera. Blackburn admite como axiomas precisamente esas instancias \cite[Def.~1.39]{blackburn}, sin definir la noción por separado. Le basta con que la fórmula tenga la forma de una tautología proposicional. La definición \ref{def:tautologia} selecciona las mismas fórmulas, como comprobaremos más abajo, pero por un camino distinto. La preferimos porque la versión por sustitución exigiría introducir ese lenguaje auxiliar, una operación de sustitución y un lema que las conecte, mientras que evaluar con dos asignaciones es una recursión inmediata sobre fórmulas.
 
 \begin{definicion}[El sistema $\K$]\label{def:sistemaK}
-La relación de demostrabilidad $\proves \varphi$ (``$\varphi$ es un teorema
-de $\K$'') es la menor relación que cumple:
+La relación de demostrabilidad $\proves \varphi$ (``$\varphi$ es un teorema de $\K$'') es la menor relación que cumple:
 \begin{itemize}
-  \item[\textup{(CPL)}] $\proves \varphi$ para toda \emph{tautología
-        clásica} $\varphi$ (véase más abajo);
-  \item[\textup{(K)}] $\proves \nec(\varphi \limp \psi) \limp
-        (\nec\varphi \limp \nec\psi)$, para cualesquiera fórmulas
-        $\varphi, \psi$ (\emph{axioma de distribución});
-  \item[\textup{(MP)}] si $\proves \varphi \limp \psi$ y $\proves \varphi$,
-        entonces $\proves \psi$ (\emph{modus ponens});
-  \item[\textup{(N)}] si $\proves \varphi$, entonces $\proves \nec\varphi$
-        (\emph{regla de necesitación}).
+    \item[\textup{(CPL)}] $\proves \varphi$ para toda \emph{tautología clásica} $\varphi$ (definición \ref{def:tautologia});
+  \item[\textup{(K)}] $\proves \nec(\varphi \limp \psi) \limp (\nec\varphi \limp \nec\psi)$, para cualesquiera fórmulas $\varphi, \psi$ (\emph{axioma de distribución});
+  \item[\textup{(MP)}] si $\proves \varphi \limp \psi$ y $\proves \varphi$, entonces $\proves \psi$ (\emph{modus ponens});
+  \item[\textup{(N)}] si $\proves \varphi$, entonces $\proves \nec\varphi$ (\emph{regla de necesitación}).
 \end{itemize}
 \end{definicion}
 
-Detengámonos en (CPL). Lo habitual en los textos es dar tres esquemas de
-axiomas proposicionales concretos (los axiomas de Hilbert) y obtener las
-tautologías como teoremas. Aquí seguimos el camino, también estándar
-\cite[p.~33]{blackburn}, de admitir directamente todos los esquemas
-de tautologías; los propios autores lo describen como un ``exceso
-axiomático'' (\emph{axiomatic overkill}) que prefieren a la alternativa de
-fijar unos pocos axiomas y derivar de ellos el resto, refinamiento que, a
-su juicio, tiene poco interés para sus propósitos, y lo mismo vale para los
-nuestros. Precisemos la noción: una fórmula modal es una \emph{tautología
-clásica} si es verdadera bajo toda valoración booleana que asigne valores
-de verdad arbitrarios a sus variables y a sus subfórmulas maximales
-de la forma $\nec\psi$, tratadas estas como si fueran átomos opacos. La
-valoración no mira dentro de $\nec\psi$: en $\nec\nec p \limp \nec p$, por
-ejemplo, los ``átomos'' son $\nec\nec p$ y $\nec p$, que reciben valores
-independientes, y por eso la fórmula no es una tautología clásica. Es fácil
-convencerse de que esta definición equivale a la de Blackburn, ``toda
-instancia de una tautología proposicional'': basta sustituir cada
-subfórmula maximal de la forma $\nec\psi$ por una variable nueva (la misma
-para todas las ocurrencias de la misma subfórmula). Así,
-$\nec\psi \limp \nec\psi$ es una tautología clásica (es una instancia de
-$\alpha \limp \alpha$), pero $\nec p \limp p$, con $p$ una variable, no lo
-es: hay valoraciones que hacen verdadero el ``átomo'' $\nec p$ y falsa
-$p$.\footnote{Conviene escribir $\nec p \limp p$ y no
-$\nec\varphi \limp \varphi$: si $\varphi$ es ella misma una tautología,
-como $\top$, entonces $\nec\varphi \limp \varphi$ sí es una tautología
-clásica, porque ninguna valoración hace falsa $\varphi$.} Esta
-presentación evita desarrollar dentro de $\K$ toda la
-maquinaria del cálculo proposicional, que no es el objeto del trabajo, y
-tiene una traducción muy limpia a Lean, donde ``ser tautología'' se puede
-definir semánticamente (sección \ref{sec:form-tautologias}). El
-precio es que (CPL) es un esquema infinito, algo que a un sistema formal
-como Lean no le supone ningún problema.
+\begin{observacion}
+Detengámonos en (CPL). Lo habitual en los textos es dar tres esquemas de axiomas proposicionales concretos (los axiomas de Hilbert) y obtener las tautologías como teoremas. Aquí seguimos el camino, también estándar \cite[p.~33]{blackburn}, de admitir directamente todas las tautologías clásicas; los propios autores lo describen como un ``exceso axiomático'' (\emph{axiomatic overkill}) que prefieren a la alternativa de fijar unos pocos axiomas y derivar de ellos el resto, refinamiento que, a su juicio, tiene poco interés para sus propósitos, y lo mismo vale para los nuestros. Esta presentación evita desarrollar dentro de $\K$ toda la maquinaria del cálculo proposicional, que no es el objeto del trabajo. El precio es que el sistema deja de tener una base finita de axiomas y damos por supuesta la completitud del cálculo proposicional clásico, que no demostramos aquí.
 
-El sistema de la definición \ref{def:sistemaK} no es literalmente el $\K$
-de Blackburn \cite[Def.~1.39]{blackburn}, y conviene dejar claro en qué
-difieren y por qué tienen los mismos teoremas. Allí $\K$ cuenta con un
-tercer axioma, \textup{(Dual)} $\pos p \leftrightarrow \lnot\nec\lnot p$, y
-con una tercera regla, la \emph{sustitución uniforme}: de
-$\proves \varphi$ se pasa a $\proves \varphi^\sigma$, donde
-$\varphi^\sigma$ resulta de sustituir uniformemente las variables de
-$\varphi$ por fórmulas cualesquiera. Además, los axiomas (K) y (Dual) se
-enuncian con variables concretas $p$, $q$, y no como esquemas.
+En esa estrategia coincidimos con Blackburn, pero no en qué fórmulas cuentan como tautologías: su (CPL) admite las instancias de tautologías proposicionales, y el nuestro, las tautologías clásicas de la definición \ref{def:tautologia}. Conviene comprobar que ambas clases coinciden:
+
+En un sentido, toda instancia de una tautología proposicional es una tautología clásica. Si $\varphi$ se obtiene de una tautología proposicional $\pi$ sustituyendo sus variables por fórmulas modales, toda valoración booleana $v$ de $\varphi$ induce una valoración de las variables de $\pi$ (a cada una se le da el valor $\hat{v}$ de la fórmula que la sustituye), y $\hat{v}(\varphi) = 1$ porque $\pi$ es una tautología.
+
+Recíprocamente, toda tautología clásica es una instancia de una tautología proposicional. Dada $\varphi$, sustituimos cada una de sus subfórmulas que empieza por $\nec$ y no está dentro de otra caja por una variable nueva, la misma para todas las ocurrencias de la misma subfórmula. El resultado $\pi$ ya no contiene el operador $\nec$, y una valoración booleana de $\varphi$ no es más que una valoración proposicional de $\pi$, con $v_\nec$ leída sobre las variables nuevas; luego si $\varphi$ es una tautología clásica, $\pi$ es una tautología proposicional y $\varphi$ es una instancia suya.
+\end{observacion}
+
+\begin{observacion}
+Aparte de (CPL), el sistema de la definición \ref{def:sistemaK} tampoco es literalmente el $\K$ de Blackburn \cite[Def.~1.39]{blackburn}, y conviene dejar claro en qué difieren y por qué tienen los mismos teoremas. Allí, $\K$ cuenta con un tercer axioma, \textup{(Dual)} $\pos p \leftrightarrow \lnot\nec\lnot p$, y con una tercera regla, la \emph{sustitución uniforme}, que de $\proves \varphi$ pasa a $\proves \varphi^\sigma$, donde $\varphi^\sigma$ resulta de sustituir uniformemente las variables de $\varphi$ por fórmulas cualesquiera. Además, los axiomas (K) y (Dual) se enuncian con variables concretas $p$, $q$, y no como esquemas.
 \begin{itemize}
-  \item \textup{(Dual)} sobra en nuestro lenguaje. Como aquí $\pos\varphi$
-        es por definición $\lnot\nec\lnot\varphi$, el axioma se
-        desplegaría a $\lnot\nec\lnot\varphi \leftrightarrow
-        \lnot\nec\lnot\varphi$, una instancia de
-        $\alpha \leftrightarrow \alpha$, que ya está en (CPL). Los propios
-        autores lo advierten \cite[p.~34]{blackburn}: (Dual) solo hace
-        falta porque su primitivo es $\pos$, y de haber tomado $\nec$ como
-        primitivo no habría sido necesario.
-  \item La \emph{sustitución uniforme} sobra porque nuestros axiomas son
-        esquemas: (K) se postula de golpe para todas las fórmulas
-        $\varphi, \psi$, y el conjunto de las tautologías es cerrado bajo
-        sustitución por su propia definición. Con ello, la cerradura de los
-        teoremas bajo sustitución deja de ser una regla y pasa a ser un
-        teorema, que se demuestra por inducción sobre la derivación:
-        las instancias de tautologías son tautologías, las instancias de
-        (K) son instancias de (K), y las reglas (MP) y (N) conmutan con la
-        sustitución.
+  \item \textup{(Dual)} sobra en nuestro lenguaje. Como aquí $\pos\varphi$ es por definición $\lnot\nec\lnot\varphi$, el axioma se desplegaría a $\lnot\nec\lnot\varphi \leftrightarrow \lnot\nec\lnot\varphi$, una instancia de $\alpha \leftrightarrow \alpha$, que ya está en (CPL). Los propios autores lo advierten \cite[p.~34]{blackburn}. El axioma solo hace falta porque su primitivo es $\pos$, y de haber tomado $\nec$ como primitivo no habría sido necesario. Podría objetarse que falta entonces la dualidad leída al revés, $\nec p \leftrightarrow \lnot\pos\lnot p$, que es la que en nuestro lenguaje dice algo. En efecto, al desplegar $\pos$ se convierte en $\nec p \leftrightarrow \lnot\lnot\nec\lnot\lnot p$, y sus dos subfórmulas modales maximales, $\nec p$ y $\nec\lnot\lnot p$, son átomos opacos distintos, de modo que no es una tautología clásica. Pero tampoco hay que postularla, porque es un teorema. De la tautología $p \leftrightarrow \lnot\lnot p$, la regla RE (proposición \ref{prop:re}, más abajo) da $\proves \nec p \leftrightarrow \nec\lnot\lnot p$, y la tautología $(\alpha \leftrightarrow \beta) \limp (\alpha \leftrightarrow \lnot\lnot\beta)$ concluye con un modus ponens; el argumento vale igual con una fórmula cualquiera en lugar de $p$. La asimetría con Blackburn tiene una explicación sencilla. En su sistema $\pos$ solo aparece dentro del patrón $\lnot\pos\lnot$ con el que se define $\nec$, así que ningún axioma habla de un $\pos p$ desnudo y la dualidad hay que postularla; en el nuestro $\nec$ aparece libre en (K) y en (N), y eso basta para demostrarla. AAA
+  \item La \emph{sustitución uniforme} sobra porque nuestros axiomas son esquemas. El axioma (K) se postula de golpe para todas las fórmulas $\varphi, \psi$, y el conjunto de las tautologías es cerrado bajo sustitución por su propia definición. Con ello, que el conjunto de teoremas sea cerrado bajo sustitución deja de ser una regla y pasa a ser un teorema, que se demuestra por inducción sobre la derivación.
 \end{itemize}
-Así pues, formulados en nuestro lenguaje, el sistema de Blackburn y el de
-la definición \ref{def:sistemaK} demuestran exactamente las mismas
-fórmulas: cada uno contiene los axiomas del otro y es cerrado bajo sus
-reglas. Dicho de otro modo, el conjunto de nuestros teoremas contiene las
-tautologías, (K) y (Dual), y es cerrado bajo (MP), (N) y sustitución
-uniforme, es decir, es una \emph{lógica modal normal} en el sentido de
-\cite[Def.~1.42]{blackburn}; y, al estar generado por lo imprescindible, es
-la menor de todas ellas, que es justamente como se define $\K$ en esa
-definición. De hecho, nuestra definición ``como la menor relación que
-cumple\dots'' está más cerca de esa caracterización conjuntista que de la
-definición 1.39 (demostraciones como sucesiones finitas de fórmulas); la
-equivalencia entre ambos puntos de vista es el ejercicio 1.6.6 de
-\cite{blackburn}, y la versión ``menor relación'' es precisamente la que
-produce una definición inductiva en Lean.
+\end{observacion}
 
-Los axiomas (K) y la regla (N) capturan el comportamiento mínimo de $\nec$:
-la necesidad distribuye sobre la implicación, y los teoremas son necesarios.
-Nótese lo que la regla (N) no dice: no afirma
-$\proves \varphi \limp \nec\varphi$ (las verdades contingentes no son
-necesarias), sino solo que las fórmulas demostrables pueden
-``encajonarse''. Blackburn dedica a este punto una advertencia expresa
-\cite[Obs.~1.41]{blackburn}: quien venga de la deducción natural puede
-sentirse tentado de suponer $p$, aplicar (N) para obtener $\nec p$ y
-``descargar'' la hipótesis concluyendo $p \limp \nec p$, que no es válida.
-El error está en aplicar (N) a una hipótesis: la regla solo se aplica a
-teoremas. Volveremos sobre ello al definir la deducción desde hipótesis
-(sección \ref{sec:mapa-completitud}).
+Así pues, formulados en nuestro lenguaje, el sistema de Blackburn y el de la definición \ref{def:sistemaK} demuestran exactamente las mismas fórmulas, ya que cada uno contiene los axiomas del otro y es cerrado bajo sus reglas. De hecho, nuestra definición ``como la menor relación que cumple\dots'' está más cerca de esa caracterización conjuntista que de la definición 1.39 de \cite{blackburn} (demostraciones como sucesiones finitas de fórmulas); la equivalencia entre ambos puntos de vista es el ejercicio 1.6.6 de \cite{blackburn}, y la versión ``menor relación'' es precisamente la que produce una definición inductiva en Lean.
 
-De estos ingredientes se derivan reglas útiles. Destacamos las dos que
-formalizaremos, con sus demostraciones en papel, que después podrán
-compararse línea a línea con el código:
+Cerrada la comparación con el libro, volvamos al contenido del sistema. Las únicas piezas propiamente modales de $\K$ son el axioma (K) y la regla (N), y entre las dos capturan el comportamiento mínimo de $\nec$: la necesidad distribuye sobre la implicación, y los teoremas son necesarios. Todo lo demás que $\K$ demuestra sale de combinarlas con el cálculo proposicional.
+
+Conviene precisar el alcance de (N). La regla no afirma $\proves \varphi \limp \nec\varphi$ (las verdades contingentes no son necesarias), sino solo que las fórmulas demostrables pueden ``encajonarse''. Blackburn dedica a este punto una advertencia expresa \cite[Obs.~1.41]{blackburn}. Quien venga de la deducción natural puede sentirse tentado de razonar así:
+\[
+\begin{array}{rll}
+  1. & p & \text{hipótesis}\\
+  2. & \nec p & \text{(N) aplicada a 1}\\
+  3. & p \limp \nec p & \text{se convierte la hipótesis en antecedente}
+\end{array}
+\]
+El resultado no es válido, luego tampoco es un teorema de $\K$. El error está en el paso 2: (N) solo se aplica a teoremas, y $p$ es aquí una hipótesis. Volveremos sobre ello al definir la deducción desde hipótesis (sección \ref{sec:mapa-completitud}).
+
+De estos ingredientes se derivan reglas útiles. Destacamos las dos que formalizaremos, con sus demostraciones en papel, que después podrán compararse línea a línea con el código.
 
 \begin{proposicion}[Regla de monotonía, RM]\label{prop:rm}
 Si\/ $\proves \varphi \limp \psi$, entonces
 $\proves \nec\varphi \limp \nec\psi$.
 \end{proposicion}
 \begin{proof}
-Por (N), de $\proves \varphi \limp \psi$ obtenemos
-$\proves \nec(\varphi \limp \psi)$. El axioma (K) da
-$\proves \nec(\varphi \limp \psi) \limp (\nec\varphi \limp \nec\psi)$, y
-(MP) concluye.
+Por (N), de $\proves \varphi \limp \psi$ obtenemos $\proves \nec(\varphi \limp \psi)$. El axioma (K) da $\proves \nec(\varphi \limp \psi) \limp (\nec\varphi \limp \nec\psi)$, y (MP) concluye.
 \end{proof}
 
 \begin{proposicion}[Regla de equivalencia, RE]\label{prop:re}
@@ -253,58 +145,23 @@ Si\/ $\proves \varphi \leftrightarrow \psi$, entonces
 $\proves \nec\varphi \leftrightarrow \nec\psi$.
 \end{proposicion}
 \begin{proof}
-De $\proves \varphi \leftrightarrow \psi$ se extraen, usando las tautologías
-$(\varphi \leftrightarrow \psi) \limp (\varphi \limp \psi)$ y
-$(\varphi \leftrightarrow \psi) \limp (\psi \limp \varphi)$ junto con (MP),
-las dos implicaciones $\proves \varphi \limp \psi$ y
-$\proves \psi \limp \varphi$. La regla RM da entonces
-$\proves \nec\varphi \limp \nec\psi$ y $\proves \nec\psi \limp \nec\varphi$,
-y la tautología $(\alpha \limp \beta) \limp ((\beta \limp \alpha) \limp
-(\alpha \leftrightarrow \beta))$, con dos aplicaciones de (MP), las reúne en
-la equivalencia buscada.
+De $\proves \varphi \leftrightarrow \psi$ se extraen, usando las tautologías $(\varphi \leftrightarrow \psi) \limp (\varphi \limp \psi)$ y $(\varphi \leftrightarrow \psi) \limp (\psi \limp \varphi)$ junto con (MP), las dos implicaciones $\proves \varphi \limp \psi$ y $\proves \psi \limp \varphi$. La regla RM da entonces $\proves \nec\varphi \limp \nec\psi$ y $\proves \nec\psi \limp \nec\varphi$, y la tautología $(\alpha \limp \beta) \limp ((\beta \limp \alpha) \limp (\alpha \leftrightarrow \beta))$, con dos aplicaciones de (MP), las reúne en la equivalencia buscada.
 \end{proof}
 
-Obsérvese el patrón de estas demostraciones: los únicos movimientos
-permitidos son citar un axioma y aplicar una regla. Es un estilo rígido pero es exactamente esta rigidez
-la que lo hace formalizable de manera directa.
+Obsérvese el patrón de estas dos demostraciones donde los únicos movimientos permitidos son citar un axioma y aplicar una regla.
 
 \section{Semántica de Kripke}\label{sec:kripke-mat}
 
-La semántica estándar de la lógica modal, debida a Kripke \cite{kripke}, se apoya en una
-idea muy visual: la de \emph{mundos posibles} conectados por una relación de
-accesibilidad. Una fórmula no es verdadera o falsa en abstracto, sino
-en un mundo; y los operadores modales cuantifican sobre los mundos
-accesibles desde el actual.
+La semántica estándar de la lógica modal, debida a Kripke \cite{kripke}, se apoya en una idea muy visual, la de \emph{mundos posibles} conectados por una relación de accesibilidad. Una fórmula es verdadera o falsa en un mundo y los operadores modales cuantifican sobre los mundos accesibles desde el actual.
 
 \begin{definicion}[Marcos y modelos]\label{def:kripke}
-Un \emph{marco de Kripke} es un par $F = (W, R)$ formado por un conjunto no
-vacío\footnote{En la formalización el tipo de mundos podrá ser vacío; véase
-la observación \ref{obs:vacio} en la sección \ref{sec:form-semantica}.} $W$
-de mundos y una relación binaria $R \subseteq W \times W$, la
-\emph{relación de accesibilidad}. Un \emph{modelo de Kripke} sobre
-$\mathrm{VP}$ es un par $M = (F, V)$ donde $F$ es un marco y
-$V \colon W \to \mathcal{P}(\mathrm{VP})$ es una \emph{valoración} que
-indica qué variables son verdaderas en cada mundo.
+Un \emph{marco de Kripke} es un par $F = (W, R)$ formado por un conjunto no vacío\footnote{En la formalización el tipo de mundo podrá ser vacío; véase la observación \ref{obs:vacio} en la sección \ref{sec:form-semantica}.} $W$ de mundos y una relación binaria $R \subseteq W \times W$, la \emph{relación de accesibilidad}. Un \emph{modelo de Kripke} sobre $\mathsf{VP}$ es un par $M = (F, V)$ donde $F$ es un marco y $V \colon W \to \mathcal{P}(\mathsf{VP})$ es una \emph{valoración} que indica qué variables son verdaderas en cada mundo.
 \end{definicion}
 
-Un marco es, sencillamente, un grafo dirigido; escribimos $R\,w\,v$ o
-$w \mathrel{R} v$ para ``desde $w$ es accesible $v$''. En la valoración
-hay otra pequeña adaptación respecto a \cite[Def.~1.19]{blackburn}, donde
-$V \colon \mathrm{VP} \to \mathcal{P}(W)$ asigna a cada variable el
-conjunto de mundos en que es verdadera, de modo que la cláusula atómica de
-la definición siguiente se lee allí $w \in V(p)$. Nosotros la escribimos al
-revés, $V \colon W \to \mathcal{P}(\mathrm{VP})$, y leeremos $p \in V(w)$.
-La información es la misma (en ambos casos, un subconjunto de
-$W \times \mathrm{VP}$), pero nuestra dirección es la que usaremos en la
-figura \ref{fig:kripke-ejemplo}, en el modelo canónico de la sección
-\ref{sec:mapa-completitud} (donde la valoración de un mundo $\Gamma$ es el
-conjunto de variables que pertenecen a $\Gamma$) y en el código, donde la
-valoración recibe primero el mundo y después la variable.
+Un marco es, sencillamente, un grafo dirigido; escribimos $R\,w\,v$ o $w \mathrel{R} v$ para indicar que ``desde $w$ es accesible $v$''. En la valoración hay otra pequeña adaptación respecto a \cite[Def.~1.19]{blackburn}, donde $V \colon \mathsf{VP} \to \mathcal{P}(W)$ asigna a cada variable el conjunto de mundos en que es verdadera, de modo que la cláusula atómica de la definición siguiente se lee allí $w \in V(p)$. Nosotros la escribimos al revés, $V \colon W \to \mathcal{P}(\mathsf{VP})$, y leeremos $p \in V(w)$. La información es la misma (en ambos casos, un subconjunto de $W \times \mathsf{VP}$).
 
 \begin{definicion}[Satisfacción]\label{def:satisfaccion}
-Dado un modelo $M$ y un mundo $w$, la relación $M, w \vDash \varphi$
-(``$\varphi$ es verdadera en el mundo $w$ de $M$'') se define por recursión
-sobre $\varphi$:
+Dado un modelo $M$ y un mundo $w$, la relación $M, w \vDash \varphi$ (leído ``$\varphi$ es verdadera en el mundo $w$ de $M$'') se define por recursión sobre $\varphi$:
 \[
 \begin{array}{lcl}
   M, w \vDash p &\iff& p \in V(w),\\
@@ -312,20 +169,17 @@ sobre $\varphi$:
   M, w \vDash \varphi \limp \psi &\iff& \text{si } M, w \vDash \varphi
       \text{ entonces } M, w \vDash \psi,\\
   M, w \vDash \nec\varphi &\iff& \text{para todo } v \text{ con } R\,w\,v,\
-      M, v \vDash \varphi.
+      M, v \vDash \varphi
 \end{array}
 \]
 \end{definicion}
 
-La cláusula interesante es la última: $\nec\varphi$ es verdadera en $w$
-cuando $\varphi$ lo es en todos los mundos accesibles desde $w$.
-Desplegando las abreviaturas se comprueba que las conectivas derivadas
-reciben el significado esperado; en particular,
+La cláusula interesante es la última. La fórmula $\nec\varphi$ es verdadera en $w$ cuando $\varphi$ lo es en todos los mundos accesibles desde $w$. Desplegando las abreviaturas se comprueba que las conectivas derivadas reciben el significado esperado; en particular,
 \[
   M, w \vDash \pos\varphi \iff \text{existe } v \text{ con } R\,w\,v
-  \text{ y } M, v \vDash \varphi:
+  \text{ y } M, v \vDash \varphi.
 \]
-la posibilidad es la cuantificación existencial sobre los mundos accesibles.
+La posibilidad es, por tanto, la cuantificación existencial sobre los mundos accesibles.
 
 \begin{figure}[htb]
 \centering
@@ -344,79 +198,40 @@ la posibilidad es la cuantificación existencial sobre los mundos accesibles.
   \node[below=2mm of w2] {$p, q$};
   \node[below=2mm of w3] {$q$};
 \end{tikzpicture}
-\caption{Un modelo de Kripke con tres mundos; bajo cada mundo se listan las
-variables que su valoración hace verdaderas. Se cumple, por ejemplo,
-$M, w_1 \vDash \pos p$ (hay un mundo accesible, $w_2$, donde vale $p$);
-en cambio $M, w_1 \nvDash \nec p$, porque $p$ falla en el mundo accesible
-$w_3$. También $M, w_2 \vDash \nec q$: el único mundo accesible desde $w_2$
-es $w_3$, y allí vale $q$. En $w_3$, cuyo único sucesor es él mismo, valen
-tanto $\nec q$ como $\pos q$; sin el bucle, $w_3$ no tendría sucesores y
-$\nec q$ seguiría siendo verdadera, pero vacuamente, mientras que $\pos q$
-pasaría a ser falsa (véase la observación siguiente).}
+\caption{Un modelo de Kripke con tres mundos; bajo cada mundo se listan las variables que su valoración hace verdaderas. Se cumple, por ejemplo, $M, w_1 \vDash \pos p$ (hay un mundo accesible, $w_2$, donde vale $p$). En cambio, $M, w_1 \nvDash \nec p$, porque $p$ falla en el mundo accesible $w_3$. También $M, w_2 \vDash \nec q$, porque el único mundo accesible desde $w_2$ es $w_3$, y allí vale $q$. En $w_3$, cuyo único sucesor es él mismo, valen tanto $\nec q$ como $\pos q$; sin el bucle, $w_3$ no tendría sucesores y $\nec q$ seguiría siendo verdadera, pero vacuamente, mientras que $\pos q$ pasaría a ser falsa.}
 \label{fig:kripke-ejemplo}
 \end{figure}
 
 \begin{observacion}
-En un mundo sin sucesores, $\nec\varphi$ es verdadera vacuamente para
-cualquier $\varphi$ (¡incluida $\bot$!), pues la condición ``en todo mundo
-accesible\dots'' no tiene nada que comprobar. Dualmente, $\pos\varphi$ es
-falsa para toda $\varphi$. Este fenómeno, que puede resultar chocante, es
-inofensivo en $\K$ y volverá a aparecer en la formalización: el modelo con
-el que probaremos la consistencia del sistema es, precisamente, un único
-mundo sin sucesores.
+En un mundo sin sucesores, $\nec\varphi$ es verdadera vacuamente para cualquier $\varphi$ (incluida $\bot$), pues la condición ``en todo mundo accesible\dots'' no tiene nada que comprobar. Dualmente, $\pos\varphi$ es falsa para toda $\varphi$. Este fenómeno volverá a aparecer en la formalización: el modelo con el que probaremos la consistencia del sistema es, precisamente, un único mundo sin sucesores.
 \end{observacion}
 
 \begin{definicion}[Validez]\label{def:validez}
-Una fórmula $\varphi$ es \emph{válida en un modelo} $M$, escrito
-$M \vDash \varphi$, si $M, w \vDash \varphi$ para todo mundo $w$ de $M$;
-es \emph{válida en un marco} $F$ si es válida en todo modelo sobre $F$; y es
-\emph{válida} (sin más), escrito $\vDash \varphi$, si es válida en todo
-modelo de Kripke.
+Una fórmula $\varphi$ es \emph{válida en un modelo} $M$, escrito $M \vDash \varphi$, si $M, w \vDash \varphi$ para todo mundo $w$ de $M$. Es \emph{válida en un marco} $F$ si es válida en todo modelo sobre $F$. Por último, es \emph{válida}, escrito $\vDash \varphi$, si es válida en todo modelo de Kripke.
 \end{definicion}
 
-Una advertencia terminológica. Blackburn \cite[Def.~1.21]{blackburn} llama
-a la primera noción \emph{verdad global} (o \emph{universal}) en el modelo,
-y reserva la palabra ``válida'' para los marcos y las clases de marcos
-\cite[Def.~1.28]{blackburn}: solo al cuantificar sobre todas las
-valoraciones se abstrae de la información contingente que aporta $V$ y se
-llega a una noción propiamente lógica. Hemos preferido un único nombre para
-los tres niveles, que es también el que usa el código (\lean{ValidInModel},
-\lean{ValidInFrame} y \lean{Valid}), pero conviene tener presente la
-distinción al consultar el libro.
+\begin{observacion}
+Una advertencia terminológica. Blackburn \cite[Def.~1.21]{blackburn} llama a la primera noción \emph{verdad global} (o \emph{universal}) en el modelo, y reserva la palabra \emph{válida}' para los marcos y las clases de marcos \cite[Def.~1.28]{blackburn}. El motivo es que la verdad global depende de la valoración elegida, y por eso no es una noción lógica. Si $V$ hace verdadera $p$ en todos los mundos, se tiene $M \vDash p$, pero eso informa sobre $V$ y no sobre $p$. En ese mismo modelo puede fallar $q$, que se obtiene de $p$ por sustitución uniforme \cite[p.~34]{blackburn}. La validez en un marco cuantifica sobre todas las valoraciones, así que lo que queda depende solo de la relación de accesibilidad. Hemos preferido un único nombre para los tres niveles, que es también el que usa el código (\lean{ValidInModel}, \lean{ValidInFrame} y \lean{Valid}), pero conviene tener presente la distinción al consultar el libro.
+\end{observacion}
 
-La noción central para nosotros es la última, porque es la contrapartida
-semántica de la demostrabilidad en $\K$. La validez en un marco, que no
-depende de la valoración, es la puerta de entrada a las lógicas modales más
-fuertes: por ejemplo, $\nec p \limp p$ (con $p$ una variable) es válida en
-un marco exactamente cuando este es reflexivo, y añadirla como axioma da la
-lógica $\mathbf{T}$.\footnote{De nuevo importa escribir $\nec p \limp p$ y
-no $\nec\varphi \limp \varphi$: la instancia $\nec\top \limp \top$ es válida
-en todo marco. Lo que caracteriza a los marcos reflexivos es la validez de
-la fórmula con una variable o, equivalentemente, la de todas las instancias
-del esquema. Estas correspondencias entre fórmulas y propiedades de los
-marcos son el tema del capítulo 3 de \cite{blackburn}.} En este trabajo la
-definimos por completitud del planteamiento, pero no la explotamos.
+La noción central para nosotros es la última, porque es la contrapartida semántica de la demostrabilidad en $\K$. La validez en un marco, que no depende de la valoración y que es la necesaria para la construcción de lógicas modales más fuertes. Por ejemplo, $\nec p \limp p$ es válida en un marco exactamente cuando este es reflexivo, y añadirla como axioma da la lógica $\mathbf{T}$.\footnote{De nuevo es esencial que $p$ sea una variable: la instancia $\nec\top \limp \top$ del esquema $\nec\varphi \limp \varphi$ es válida en todo marco. Lo que caracteriza a los marcos reflexivos es la validez de $\nec p \limp p$ o, equivalentemente, la de todas las instancias del esquema. Estas correspondencias entre fórmulas y propiedades de los marcos son el tema del capítulo 3 de \cite{blackburn}.} En este trabajo definimos esta noción de validez para completitar el planteamiento, aunque no la usaremos para formalizar la lógica $\K$.
 
-Dos ejemplos orientan sobre qué es válido y qué no.
+\begin{ejemplo}\label{ej:k-valido}
+El axioma K, $\nec(\varphi \limp \psi) \limp (\nec\varphi \limp \nec\psi)$, es válido.
 
-La fórmula
-$\nec(\varphi \limp \psi) \limp (\nec\varphi \limp \nec\psi)$ (el axioma K)
-es válida: si en todo mundo accesible valen $\varphi \limp \psi$ y
-$\varphi$, en todo mundo accesible vale $\psi$; es un ``modus ponens mundo a
-mundo''.
+Sean $M$ un modelo y $w$ un mundo con $M, w \vDash \nec(\varphi \limp \psi)$ y $M, w \vDash \nec\varphi$. Si $v$ es accesible desde $w$, en $v$ valen $\varphi \limp \psi$ y $\varphi$, luego vale $\psi$. Como esto ocurre para todo mundo accesible desde $w$, se tiene $M, w \vDash \nec\psi$. Es un modus ponens mundo a mundo.
+\end{ejemplo}
 
-En cambio, $\nec p \limp p$ no es válida: en un modelo con dos
-mundos $w \mathrel{R} v$, sin más flechas, con $p$ verdadera solo en $v$, se
-tiene $M, w \vDash \nec p$ pero no $M, w \vDash p$. Como $\K$ demostrará
-exactamente las fórmulas válidas, este contraejemplo muestra también que
-$\nec p \limp p$ no es un teorema de $\K$.
+\begin{ejemplo}\label{ej:box-p-imp-p}
+La fórmula $\nec p \limp p$ no es válida.
+
+Tomemos el modelo con dos mundos $w \mathrel{R} v$, sin más flechas, y con $p$ verdadera solo en $v$. Entonces $M, w \vDash \nec p$, porque $p$ vale en el único mundo accesible desde $w$, pero $M, w \nvDash p$. Como $\K$ demostrará exactamente las fórmulas válidas, este contraejemplo muestra también que $\nec p \limp p$ no es un teorema de $\K$.
+\end{ejemplo}
 
 \section{Corrección y completitud: el mapa de la demostración}
 \label{sec:mapa-completitud}
 
-Tenemos dos nociones de ``verdad lógica'': la sintáctica
-($\proves \varphi$) y la semántica ($\vDash \varphi$). Los dos teoremas
-centrales de este trabajo afirman que coinciden.
+Tenemos dos nociones de \emph{verdad}: la sintáctica ($\proves \varphi$) y la semántica ($\vDash \varphi$). Los dos teoremas centrales de este trabajo afirman que coinciden.
 
 \begin{teorema}[Corrección]\label{teo:correccion-mat}
 Si $\proves \varphi$, entonces $\vDash \varphi$.
@@ -426,120 +241,126 @@ Si $\proves \varphi$, entonces $\vDash \varphi$.
 Si $\vDash \varphi$, entonces $\proves \varphi$.
 \end{teorema}
 
-Son los enunciados que formalizaremos (\lean{soundness} y
-\lean{completeness} en el capítulo \ref{sec:formalizacion}). Conviene saber
-que Blackburn demuestra algo más fuerte \cite[Teorema~4.23]{blackburn}, la
-llamada completitud \emph{fuerte}: para todo conjunto de fórmulas $\Sigma$,
-si $\varphi$ es consecuencia semántica de $\Sigma$ (es decir, $\varphi$ es
-verdadera en todo mundo de todo modelo en el que sean verdaderas todas las
-fórmulas de $\Sigma$), entonces $\varphi$ se deduce de $\Sigma$ en $\K$. El
-teorema \ref{teo:completitud-mat} es el caso $\Sigma = \emptyset$. En este
-trabajo nos limitamos a la versión débil; la construcción que describimos a
-continuación es, en cualquier caso, la misma que da la fuerte.
+Son los enunciados que formalizaremos (\lean{soundness} y \lean{completeness} en el capítulo \ref{sec:formalizacion}). Conviene saber que Blackburn demuestra algo más fuerte \cite[Teorema~4.23]{blackburn}, la llamada completitud \emph{fuerte}. Esto es, que para todo conjunto de fórmulas $\Sigma$, si $\varphi$ es consecuencia semántica de $\Sigma$ (es decir, $\varphi$ es verdadera en todo mundo de todo modelo en el que sean verdaderas todas las fórmulas de $\Sigma$), entonces $\varphi$ se deduce de $\Sigma$ en $\K$. El teorema \ref{teo:completitud-mat} es el caso $\Sigma = \emptyset$. En este trabajo nos limitamos a la versión débil; la construcción que describimos a continuación es, en cualquier caso, la misma que da la fuerte.
 
-La corrección es la dirección fácil, y su demostración es una inducción
-sobre la derivación de $\proves \varphi$: basta comprobar que los axiomas
-(las tautologías y el axioma K) son válidos y que las reglas (MP y N)
-preservan la validez. El único punto delicado es el caso (CPL): hay que
-conectar la noción booleana de tautología (donde las subfórmulas $\nec\psi$
-son átomos opacos) con la satisfacción en un mundo concreto. La clave es que,
-fijado un mundo $w$, podemos ``leer'' en él una valoración booleana ---la
-que asigna a cada átomo y a cada $\nec\psi$ su valor de verdad en $w$--- y
-comprobar, por inducción estructural, que evaluar clásicamente con esa
-valoración coincide con la satisfacción en $w$. Este lema puente
-(\lean{cpl_eval_iff_satisfies} en la formalización) hace todo el trabajo.
+\subsection*{Corrección}
 
-Una consecuencia inmediata de la corrección es la \emph{consistencia} del
-sistema: $\nvdash \bot$, pues $\bot$ falla en cualquier mundo de cualquier
-modelo (y existe al menos un modelo con un mundo).
+De la corrección, que es la dirección sencilla, damos aquí un esbozo. Antes, incluimos un lema puente\footnote{Este lema puente es \lean{cpl_eval_iff_satisfies} en la formalización, y corresponde al ejercicio 1.3.4 de \cite{blackburn}. Es un buen ejemplo de lo que este trabajo quiere mostrar: el paso que en papel apenas merece un ejercicio concentra en Lean buena parte del esfuerzo de la corrección.}, necesario:
 
-La completitud es sustancialmente más profunda: hay que fabricar, para cada
-fórmula no demostrable, un modelo que la refute. La estrategia clásica, que
-seguimos de \cite{blackburn}, construye de una vez un \emph{modelo
-canónico} que refuta simultáneamente todas las fórmulas no demostrables. El
-plan, cuyos pasos formalizaremos uno a uno en la sección
-\ref{sec:form-completitud}, es el siguiente:
+\begin{lema}[Lema puente]\label{lem:puente}
+Sean $M$ un modelo y $w$ un mundo de $M$, y sea $v = (v_a, v_\nec)$ la valoración booleana dada por $v_a(p) = 1$ si y solo si $p \in V(w)$, y $v_\nec(\psi) = 1$ si y solo si $M, w \vDash \nec\psi$. Entonces, para toda fórmula $\varphi$,
+\[
+  \hat{v}(\varphi) = 1 \iff M, w \vDash \varphi.
+\]
+\end{lema}
+\begin{proof}
+Por inducción estructural sobre $\varphi$. Para una variable $p$, ambos lados equivalen a $p \in V(w)$; para $\bot$, ambos son falsos; el caso $\varphi \limp \psi$ sale de la hipótesis de inducción, porque las dos definiciones tratan la implicación igual; y el caso $\nec\psi$ se cumple por la propia definición de $v_\nec$, sin usar la hipótesis de inducción, que es exactamente lo que expresa la opacidad.
+\end{proof}
 
-\begin{enumerate}
-  \item \textbf{Deducibilidad desde hipótesis.} Se generaliza
-        $\proves \varphi$ a una relación $\Gamma \proves \varphi$
-        (``$\varphi$ se deduce del conjunto de hipótesis $\Gamma$''),
-        con su \emph{teorema de deducción}: si
-        $\Gamma \cup \{\varphi\} \proves \psi$ entonces
-        $\Gamma \proves \varphi \limp \psi$. Aquí nos separamos de
-        \cite[Def.~4.4]{blackburn}, que define $\Gamma \proves \varphi$
-        mediante conjunciones finitas de premisas: o bien
-        $\proves \varphi$ directamente, o bien
-        $\proves (\psi_1 \land \dots \land \psi_n) \limp \varphi$ para
-        ciertas $\psi_1, \dots, \psi_n \in \Gamma$; nosotros la definimos
-        inductivamente, con tres reglas (usar un teorema, usar una
-        hipótesis, modus ponens). Ambas definiciones son equivalentes,
-        pero la inductiva es mucho más cómoda de formalizar: evita
-        manipular listas de fórmulas y conjunciones anidadas, y regala un
-        principio de inducción sobre deducciones. Es importante notar que
-        la regla de necesitación no se incluye entre las reglas de
-        deducción desde hipótesis: de $\Gamma \proves \varphi$ no debe
-        seguirse $\Gamma \proves \nec\varphi$ (mis hipótesis pueden ser
-        verdades contingentes). Es exactamente la trampa de la observación
-        1.41 de \cite{blackburn} que comentamos en la sección
-        \ref{sec:sistemaK}. En la definición por conjunciones finitas el
-        peligro no existe, porque (N) solo se aplica al teorema
-        $\proves (\psi_1 \land \dots \land \psi_n) \limp \varphi$; en la
-        inductiva hay que excluirla a propósito.
-  \item \textbf{Consistencia y conjuntos maximales.} Un conjunto $\Gamma$ es
-        \emph{consistente} si $\Gamma \nvdash \bot$, y \emph{maximal
-        consistente} (MCS) si además ninguna extensión propia suya es
-        consistente \cite[Def.~4.15]{blackburn}. Los MCS se comportan como
-        ``descripciones completas de un mundo'' \cite[Prop.~4.16]{blackburn}:
-        están deductivamente cerrados, para cada $\varphi$ contienen
-        exactamente una de $\varphi$, $\lnot\varphi$, y contienen
-        $\varphi \limp \psi$ si y solo si contener $\varphi$ los obliga a
-        contener $\psi$.
-  \item \textbf{Lema de Lindenbaum.} Todo conjunto consistente se extiende a
-        un MCS. La prueba de \cite[Lema~4.17]{blackburn} enumera las fórmulas
-        ($\varphi_0, \varphi_1, \dots$) y las va añadiendo una a una cuando
-        no rompen la consistencia; esto exige que el lenguaje sea numerable.
-        Nosotros seguimos el camino alternativo del lema de Zorn: la familia
-        de los conjuntos consistentes, ordenada por inclusión, tiene la
-        propiedad de que toda cadena está acotada (por su unión, que es
-        consistente porque toda deducción usa finitas hipótesis), luego
-        posee elementos maximales sobre cualquier consistente dado. Se
-        elimina así la hipótesis de numerabilidad, y la formalización se
-        beneficia del lema de Zorn ya disponible en Mathlib.
-  \item \textbf{El modelo canónico.} Sus mundos son todos los MCS;
-        la accesibilidad declara $\Gamma \mathrel{R} \Delta$ cuando $\Delta$
-        cumple todas las ``obligaciones'' modales de $\Gamma$ (si
-        $\nec\psi \in \Gamma$ entonces $\psi \in \Delta$); y la valoración
-        hace verdadera $p$ en $\Gamma$ exactamente cuando $p \in \Gamma$.
-        Blackburn \cite[Def.~4.18]{blackburn} define la accesibilidad
-        canónica con $\pos$ (si $\psi \in \Delta$ entonces
-        $\pos\psi \in \Gamma$) y demuestra en su lema 4.19 que equivale a
-        la formulación con $\nec$ que adoptamos aquí, la natural cuando
-        $\nec$ es el primitivo.
-  \item \textbf{Lema de existencia.} Si $\nec\varphi \notin \Gamma$ (con
-        $\Gamma$ un MCS), existe un MCS $\Delta$ accesible desde $\Gamma$
-        con $\varphi \notin \Delta$. Es la forma dual del lema 4.20 de
-        \cite{blackburn} (allí: si $\pos\varphi \in \Gamma$, existe
-        $\Delta$ accesible con $\varphi \in \Delta$), y la demostración es
-        la misma. Se construye aplicando Lindenbaum al
-        conjunto $\{\psi : \nec\psi \in \Gamma\} \cup \{\lnot\varphi\}$,
-        cuya consistencia hay que comprobar; el ingrediente clave es que si
-        $\{\psi : \nec\psi \in \Gamma\} \proves \varphi$ entonces
-        $\Gamma \proves \nec\varphi$ (todas las reglas de la deducción se
-        pueden ``encajonar'' gracias al axioma K y a la necesitación).
-  \item \textbf{Lema de verdad.} En el modelo canónico, verdad y pertenencia
-        coinciden: $M^c, \Gamma \vDash \varphi \iff \varphi \in \Gamma$,
-        para toda fórmula $\varphi$ \cite[Lema~4.21]{blackburn}. Se
-        demuestra por inducción estructural; los casos proposicionales
-        salen de las propiedades de los MCS, y el caso $\nec\varphi$
-        combina la definición de la accesibilidad canónica (una dirección)
-        con el lema de existencia (la otra).
-  \item \textbf{Conclusión, por contraposición.} Si $\nvdash \varphi$,
-        entonces $\{\lnot\varphi\}$ es consistente, Lindenbaum lo extiende a
-        un MCS $\Gamma$, y el lema de verdad da
-        $M^c, \Gamma \nvDash \varphi$: la fórmula $\varphi$ no es válida.
-        Es el argumento de los teoremas 4.22 y 4.23 de \cite{blackburn},
-        reducido al caso de una sola fórmula.
-\end{enumerate}
+\begin{proof}[Esbozo de la demostración del teorema \ref{teo:correccion-mat}]
+Por inducción sobre la derivación de $\proves \varphi$, con un caso por cada axioma y cada regla de la definición \ref{def:sistemaK}.
 
-AAA
+\begin{itemize}
+      \item El axioma (K) es válido, como se vio en el ejemplo \ref{ej:k-valido}.
+      \item Si $\varphi$ se obtiene por (MP) de $\psi \limp \varphi$ y $\psi$, ambas válidas por hipótesis de inducción, fijemos un modelo $M$ y un mundo $w$. En $w$ valen $\psi \limp \varphi$ y $\psi$, luego vale $\varphi$; como $M$ y $w$ son arbitrarios, $\varphi$ es válida.
+      \item Si $\nec\psi$ se obtiene por (N) de $\psi$, válida por hipótesis de inducción, entonces $\psi$ es verdadera en todos los mundos de todos los modelos, en particular en los accesibles desde cualquier $w$, luego $\nec\psi$ es válida.
+      \item Queda el caso (CPL), que es el delicado, porque hay que conectar dos maneras muy distintas de evaluar una fórmula: la booleana de la definición \ref{def:tautologia}, donde las subfórmulas $\nec\psi$ son átomos opacos, y la satisfacción en un mundo concreto. Recordemos que cada mundo determina una valoración booleana. Fijados $M$ y $w$, tomemos $v_a(p) = 1$ si y solo si $p \in V(w)$, y $v_\nec(\psi) = 1$ si y solo si $M, w \vDash \nec\psi$. Por el lema \ref{lem:puente}, $\hat{v}(\varphi) = 1$ si y solo si $M, w \vDash \varphi$, para toda fórmula $\varphi$. Los casos de $p$, $\bot$ y $\varphi \limp \psi$ son inmediatos, y el de $\nec\psi$ se cumple por la propia definición de $v_\nec$, sin usar la hipótesis de inducción, que es exactamente lo que expresa la opacidad. Ahora bien, si $\varphi$ es una tautología clásica, $\hat{v}(\varphi) = 1$ para toda valoración booleana, en particular para esta, luego $M, w \vDash \varphi$. Como $M$ y $w$ eran arbitrarios, $\varphi$ es válida.
+\end{itemize}
+\end{proof}
+
+
+
+Una consecuencia inmediata de la corrección es la \emph{consistencia} del sistema: $\nvdash \bot$, pues $\bot$ falla en cualquier mundo de cualquier modelo (y existe al menos un modelo con un mundo).
+
+\subsection*{Completitud}
+
+La completitud es sustancialmente más profunda, porque hay que fabricar, para cada fórmula no demostrable, un modelo que la refute. La estrategia clásica, que seguimos de \cite{blackburn}, construye un \emph{modelo canónico} que refuta simultáneamente todas las fórmulas no demostrables. Reunimos primero las piezas, dos definiciones y tres lemas, y con ellas la demostración del teorema se resuelve en unas líneas. Cada pieza se formaliza por separado en la sección \ref{sec:form-completitud}.
+
+\begin{definicion}[Deducibilidad desde hipótesis]\label{def:deducible}
+Dado un conjunto de fórmulas $\Gamma$, la relación $\Gamma \proves \varphi$ es la menor relación que cumple:
+\begin{itemize}
+  \item[\textup{(ax)}] si $\proves \varphi$, entonces $\Gamma \proves \varphi$;
+  \item[\textup{(hip)}] si $\varphi \in \Gamma$, entonces $\Gamma \proves \varphi$;
+  \item[\textup{(MP)}] si $\Gamma \proves \varphi \limp \psi$ y $\Gamma \proves \varphi$, entonces $\Gamma \proves \psi$.
+\end{itemize}
+\end{definicion}
+
+El símbolo $\proves$ queda así sobrecargado, pero no se genera ambigüedad. $\emptyset \proves \varphi$ si y solo si $\proves \varphi$, porque (ax) da una dirección y en la otra la regla (hip) nunca puede aplicarse. En el código son dos relaciones distintas, \lean{Provable} y \lean{DeducibleFrom}, conectadas por \lean{provable\_of\_deducibleFrom\_empty}.
+
+Aquí nos separamos de \cite[Def.~4.4]{blackburn}, que declara $\varphi$ deducible de $\Gamma$ cuando o bien $\proves \varphi$, o bien $\proves (\psi_1 \land \dots \land \psi_n) \limp \varphi$ para ciertas $\psi_1, \dots, \psi_n \in \Gamma$. Ambas definiciones son equivalentes, y cada una tiene su ventaja. La de \cite{blackburn} hace inmediato el teorema de la deducción, que por eso no aparece enunciado en su libro. La nuestra evita manipular listas de fórmulas y conjunciones anidadas, y regala un principio de inducción sobre deducciones que usaremos repetidamente. A cambio, el teorema de la deducción pasa a requerir una demostración, la de la proposición \ref{prop:deduccion}.
+
+\begin{observacion}\label{obs:sin-necesitacion}
+La regla de necesitación no figura entre las tres. De $\Gamma \proves \varphi$ no debe seguirse $\Gamma \proves \nec\varphi$, porque las hipótesis pueden ser verdades contingentes, como vimos en la observación 1.41 de \cite{blackburn} que comentamos en la sección \ref{sec:sistemaK}. Con la definición por conjunciones finitas el peligro no existe, porque (N) solo se aplica al teorema $\proves (\psi_1 \land \dots \land \psi_n) \limp \varphi$. Con la definición inductiva hay que excluirla a propósito, y la necesitación entra en las deducciones únicamente por la vía de (ax).
+\end{observacion}
+
+\begin{proposicion}[Teorema de la deducción]\label{prop:deduccion}
+Si $\Gamma \cup \{\varphi\} \proves \psi$, entonces $\Gamma \proves \varphi \limp \psi$.
+\end{proposicion}
+\begin{proof}
+Por inducción sobre la deducción de $\psi$. Si $\psi$ se obtuvo por (ax) o por (hip) con $\psi \in \Gamma$, la tautología $\psi \limp (\varphi \limp \psi)$ y (MP) dan lo buscado. Si se obtuvo por (hip) siendo $\psi$ la propia $\varphi$, basta la tautología $\varphi \limp \varphi$. Y si se obtuvo por (MP) de $\chi \limp \psi$ y $\chi$, la hipótesis de inducción da $\Gamma \proves \varphi \limp (\chi \limp \psi)$ y $\Gamma \proves \varphi \limp \chi$, que la tautología $(\varphi \limp (\chi \limp \psi)) \limp ((\varphi \limp \chi) \limp (\varphi \limp \psi))$ combina con dos aplicaciones de (MP).
+\end{proof}
+
+Las tres tautologías empleadas son la identidad y los axiomas A1 y A2 de Hilbert, que aquí no hemos tenido que postular porque (CPL) las incluye. Es una consecuencia del exceso axiomático de la sección \ref{sec:sistemaK}.
+
+\begin{definicion}[Consistencia y conjuntos maximales]\label{def:consistente}
+Un conjunto de fórmulas $\Gamma$ es \emph{consistente} si $\Gamma \nvdash \bot$. Es \emph{maximal consistente} (en adelante, MCS) si es consistente y ningún conjunto consistente lo contiene estrictamente \cite[Def.~4.15]{blackburn}.
+\end{definicion}
+
+\begin{proposicion}[Los MCS describen mundos]\label{prop:mcs}
+Sea $\Gamma$ un MCS. Entonces $\Gamma$ está deductivamente cerrado, es decir, $\Gamma \proves \varphi$ implica $\varphi \in \Gamma$; para cada $\varphi$ contiene exactamente una de $\varphi$ y $\lnot\varphi$; y contiene $\varphi \limp \psi$ si y solo si contener $\varphi$ lo obliga a contener $\psi$ \cite[Prop.~4.16]{blackburn}.
+\end{proposicion}
+
+Estas tres propiedades son las que hacen de un MCS la ``descripción completa de un mundo''. Esto es, que se comporta como una valoración total y coherente sobre todas las fórmulas, y son las que resolverán los casos proposicionales del lema de verdad.
+
+\begin{teorema}[Lema de Zorn, versión para familias de conjuntos]\label{teo:zorn}
+Sea $\mathcal{F}$ una familia de conjuntos tal que toda cadena no vacía $\mathcal{C} \subseteq \mathcal{F}$ (cadena respecto de la inclusión) admite una cota superior en $\mathcal{F}$, es decir, un $U \in \mathcal{F}$ con $\Delta \subseteq U$ para todo $\Delta \in \mathcal{C}$. Entonces, para cada $X \in \mathcal{F}$ existe un elemento maximal $\Delta \in \mathcal{F}$ con $X \subseteq \Delta$.
+\end{teorema}
+
+\begin{lema}[Lindenbaum]\label{lem:lindenbaum}
+Todo conjunto consistente está contenido en un MCS.
+\end{lema}
+\begin{proof}
+Aplicamos el teorema \ref{teo:zorn} a la familia $\mathcal{F}$ de los conjuntos consistentes de fórmulas. La cota superior de una cadena no vacía $\mathcal{C}$ es su unión $\bigcup \mathcal{C}$, que es consistente: si $\bigcup \mathcal{C} \proves \bot$, entonces, como toda deducción usa un número finito de hipótesis y $\mathcal{C}$ está totalmente ordenada por inclusión, todas ellas caben en un mismo eslabón $\Delta \in \mathcal{C}$, y $\Delta \proves \bot$ contra la consistencia de $\Delta$. Dado un consistente $\Gamma$, el teorema \ref{teo:zorn} devuelve un maximal de $\mathcal{F}$ que lo contiene, y ser maximal en la familia de los consistentes es exactamente ser un MCS.
+\end{proof}
+
+La demostración de \cite[Lema~4.17]{blackburn} es distinta puesto que enumera las fórmulas como $\varphi_0, \varphi_1, \dots$ y las va añadiendo una a una cuando no rompen la consistencia, lo que exige que el lenguaje sea numerable. La vía de Zorn elimina esa hipótesis, y de ahí que la definición \ref{def:lenguaje} no imponga ninguna condición sobre $\mathsf{VP}$.
+
+\begin{definicion}[Modelo canónico]\label{def:canonico}
+El \emph{modelo canónico} $M^c$ es el modelo de Kripke cuyos mundos son todos los MCS, con la accesibilidad
+\[
+  \Gamma \mathrel{R^c} \Delta \iff \text{para toda } \psi,\ \nec\psi \in \Gamma \text{ implica } \psi \in \Delta,
+\]
+y con la valoración que hace verdadera $p$ en $\Gamma$ exactamente cuando $p \in \Gamma$.
+\end{definicion}
+
+La accesibilidad canónica declara $\Delta$ accesible desde $\Gamma$ cuando $\Delta$ cumple todas las obligaciones modales de $\Gamma$. Blackburn \cite[Def.~4.18]{blackburn} la define con $\pos$, pidiendo que $\psi \in \Delta$ implique $\pos\psi \in \Gamma$, y prueba en su lema 4.19 que ambas formulaciones coinciden.
+
+\begin{lema}[Existencia]\label{lem:existencia}
+Sea $\Gamma$ un MCS con $\nec\varphi \notin \Gamma$. Entonces existe un MCS $\Delta$ con $\Gamma \mathrel{R^c} \Delta$ y $\varphi \notin \Delta$.
+\end{lema}
+\begin{proof}[Esbozo]
+Se aplica el lema \ref{lem:lindenbaum} al conjunto $\{\psi : \nec\psi \in \Gamma\} \cup \{\lnot\varphi\}$, de modo que el $\Delta$ resultante es accesible desde $\Gamma$ por construcción y contiene $\lnot\varphi$, luego no contiene $\varphi$. Lo único que hay que comprobar es que ese conjunto es consistente, y el ingrediente clave es que si $\{\psi : \nec\psi \in \Gamma\} \proves \varphi$, entonces $\Gamma \proves \nec\varphi$. Esto significa que toda la deducción puede ``encajonarse'' usando el axioma (K) y la necesitación, y eso contradice $\nec\varphi \notin \Gamma$.
+\end{proof}
+
+Es la forma dual del lema 4.20 de \cite{blackburn}, que enuncia que si $\pos\varphi \in \Gamma$ existe un $\Delta$ accesible con $\varphi \in \Delta$. La demostración es la misma.
+
+\begin{lema}[Verdad]\label{lem:verdad}
+Para todo MCS $\Gamma$ y toda fórmula $\varphi$ se cumple $M^c, \Gamma \vDash \varphi$ si y solo si $\varphi \in \Gamma$ \cite[Lema~4.21]{blackburn}.
+\end{lema}
+\begin{proof}[Esbozo]
+Por inducción estructural sobre $\varphi$. El caso de las variables es la definición de la valoración canónica, y los casos de $\bot$ y de la implicación salen de la proposición \ref{prop:mcs}. En el caso $\nec\varphi$, si $\nec\varphi \in \Gamma$ la definición de $R^c$ pone $\varphi$ en todo mundo accesible, y la hipótesis de inducción la hace verdadera allí. Recíprocamente, si $\nec\varphi \notin \Gamma$, el lema \ref{lem:existencia} da un mundo accesible donde $\varphi$ no pertenece y, por hipótesis de inducción, no es verdadera.
+\end{proof}
+
+En el modelo canónico, por tanto, verdad y pertenencia son lo mismo. Si $\varphi$ falla en algún mundo (semántica), es que $\varphi$ no esté en algún MCS (sintáctica).
+
+\begin{proof}[Demostración del teorema \ref{teo:completitud-mat}]
+Por contraposición. Supongamos $\nvdash \varphi$; construimos un mundo del modelo canónico en el que $\varphi$ falla.
+
+El conjunto $\{\lnot\varphi\}$ es consistente. Si no lo fuera, tendríamos $\{\lnot\varphi\} \proves \bot$, y la proposición \ref{prop:deduccion} daría $\proves \lnot\varphi \limp \bot$, que por definición de la negación es $\proves \lnot\lnot\varphi$; con la tautología $\lnot\lnot\varphi \limp \varphi$ y (MP) obtendríamos $\proves \varphi$, contra la hipótesis.
+
+Por el lema \ref{lem:lindenbaum} existe un MCS $\Gamma$ que contiene $\lnot\varphi$. Como un MCS contiene exactamente una de $\varphi$ y $\lnot\varphi$ (proposición \ref{prop:mcs}), se tiene $\varphi \notin \Gamma$, y el lema \ref{lem:verdad} da $M^c, \Gamma \nvDash \varphi$.
+
+Ese $\Gamma$ es un mundo del modelo canónico donde $\varphi$ no es verdadera, luego $\varphi$ no es válida.
+\end{proof}
+
+Es el argumento de los teoremas 4.22 y 4.23 de \cite{blackburn}, reducido al caso de una sola fórmula. Nótese que el modelo canónico no depende de $\varphi$. Se construye una sola vez y refuta a la vez todas las fórmulas no demostrables, que es lo que hace viable la versión fuerte del teorema.

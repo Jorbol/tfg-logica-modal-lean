@@ -8,11 +8,14 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \IfFileExists{lmodern.sty}{\usepackage{lmodern}}{} % fuente Latin Modern (si está disponible)
-\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\setstretch{1.15}
+\usepackage[spanish,es-noshorthands,es-noindentfirst]{babel}
 \addto\captionsspanish{%
   \renewcommand{\contentsname}{Tabla de contenidos}%
   \renewcommand{\tablename}{Tabla}
-  }
+}
 
 % ----------------------- Matemáticas ---------------------------------
 \usepackage{amsmath,amssymb,amsthm}
@@ -191,7 +194,7 @@
     \thispagestyle{empty}
   \null\vfill
   \begin{center}
-  {\noindent\rule{15cm}{1.5pt}\par}
+  {\noindent\rule{\textwidth}{1.5pt}\par}
   \vspace*{2.4mm}
     { \Huge {\bfseries {\@title}} \par}
   \vspace*{3.6mm}
@@ -212,5 +215,3 @@
   \null\vfill
 \end{alwayssingle}}
 \makeatother
-
-\usepackage{hyperref}

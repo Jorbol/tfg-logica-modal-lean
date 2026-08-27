@@ -90,7 +90,8 @@ def IsCPLTautology (φ : ModalFormula VP) : Prop :=
     cplEval v_atom v_box φ
 
 /-- Identidad: `φ ⟶ φ`. Como la demostración no inspecciona `φ`, vale en
-particular para `φ := □ψ`; en cambio, `□φ ⟶ φ` no es tautología clásica. -/
+particular para `φ := □ψ`; en cambio, `□p ⟶ p`, con p una variable no es
+tautología clásica. -/
 theorem taut_id (φ : ModalFormula VP) : IsCPLTautology (φ ⟶ φ) := by
   intro v_atom v_box hφ
   -- cplEval traduce ⟶ en la implicación → de Lean: la hipótesis es el objetivo

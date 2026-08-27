@@ -26,9 +26,12 @@ Los tipos de funciones se escriben con una flecha. Una función de los naturales
 Las funciones anónimas se escriben con la palabra clave \lean{fun}. Se trata de las $\lambda$-expresiones del cálculo lambda sobre el que se construye la teoría de tipos de Lean, y de hecho \lean{λ} es sintaxis igualmente válida y con el mismo significado. Por ejemplo:
 
 \begin{lstlisting}
-fun n => n + 1     -- la función que a cada n le asigna n + 1
-fun n m => n + m   -- dos argumentos: abrevia fun n => (fun m => n + m)
-fun _ _ => False   -- el guion bajo, un argumento cuyo nombre no interesa
+example : Nat → Nat        := fun n => n + 1
+  -- la función que a cada n le asigna n + 1
+example : Nat → Nat → Nat  := fun n m => n + m
+  -- dos argumentos: abrevia fun n => (fun m => n + m)
+example : Nat → Nat → Prop := fun _ _ => False
+  -- el guion bajo, un argumento cuyo nombre no interesa
 \end{lstlisting}
 
 La segunda línea muestra, del lado de los términos, el mismo encadenamiento que acabamos de ver en los tipos. La tercera aparecerá tal cual al definir modelos concretos en el capítulo \ref{sec:formalizacion}, como una relación que no relaciona nada con nada.
@@ -115,7 +118,8 @@ def EsPar (n : Nat) : Prop := ∃ k : Nat, n = 2 * k
 En algunas declaraciones aparecen argumentos entre llaves en lugar de entre paréntesis. Las llaves indican que el argumento es implícito: quien usa la definición no lo escribe, y Lean lo infiere del contexto. Por ejemplo, un lema sobre listas que afirme que invertir dos veces devuelve la lista de partida,
 
 \begin{lstlisting}
-theorem rev_rev {α : Type} (l : List α) : (l.reverse).reverse = l
+theorem rev_rev {α : Type} (l : List α) : (l.reverse).reverse = l :=
+  List.reverse_reverse l
 \end{lstlisting}
 
 tiene el tipo \lean{α} implícito, de modo que basta escribir \lean{rev_rev [1, 2, 3]} y Lean deduce que \lean{α} es \lean{Nat} sin más que mirar la lista. Si \lean{α} se hubiera declarado explícito, \lean{(α : Type)}, habría que escribir \lean{rev_rev Nat [1, 2, 3]}, repitiendo una información que ya está contenida en el segundo argumento. Cuando interesa dar un argumento implícito a mano, se antepone \lean{@} al nombre del resultado, lo que vuelve explícitos todos sus argumentos: \lean{@rev_rev Nat [1, 2, 3]}.
