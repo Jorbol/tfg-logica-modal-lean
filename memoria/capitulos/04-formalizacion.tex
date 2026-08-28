@@ -3,67 +3,595 @@
 % =====================================================================
 \chapter{La formalización en Lean}\label{sec:formalizacion}
 
-AAA
-
-\section{Visión general y decisiones de diseño}\label{sec:form-diseno}
-
-AAA
+Este capítulo recorre el código que constituye el núcleo del trabajo. No es un listado comentado exhaustivo. El fichero completo está en el repositorio indicado en la introducción, y aquí se reproducen solo fragmentos sobre los que comentar. Cada definición se justifica antes de escribirse y cada demostración se compara con su versión en papel del capítulo \ref{sec:logicamodal}; el orden es el mismo en los dos sitios.
 
 \section{La sintaxis}\label{sec:form-sintaxis}
 
-AAA
+La gramática de la definición \ref{def:lenguaje} se traduce en un tipo inductivo con un constructor por cláusula, y las abreviaturas de la sección \ref{sec:sintaxis-mat}, en definiciones ordinarias con su notación:
+
+\begin{lstlisting}
+inductive ModalFormula (VP : Type) where
+  | atom : VP → ModalFormula VP                                 -- variable
+  | bot  : ModalFormula VP                                      -- ⊥
+  | imp  : ModalFormula VP → ModalFormula VP → ModalFormula VP  -- implicación
+  | box  : ModalFormula VP → ModalFormula VP                    -- □
+
+def ModalFormula.neg (φ : ModalFormula VP) : ModalFormula VP :=
+  φ ⟶ ModalFormula.bot
+
+def ModalFormula.and (φ ψ : ModalFormula VP) : ModalFormula VP :=
+  ∼(φ ⟶ (∼ψ))
+
+def ModalFormula.dia (φ : ModalFormula VP) : ModalFormula VP :=
+  ∼(□(∼φ))
+\end{lstlisting}
+
+Esto es la correspondencia con $\varphi ::= p \mid \bot \mid \varphi \limp \varphi \mid \nec\varphi$ que es ``el menor conjunto que contiene las variables y $\bot$ y está cerrado bajo $\limp$ y bajo $\nec$'' (sección \ref{sec:tipos-inductivos}). De aquí salen los dos principios que usaremos a lo largo de toda la implementación: el de recursión y el de inducción estructural.
+
+Un detalle a observar es que \lean{∼φ} sea \lean{φ ⟶ ModalFormula.bot} imita deliberadamente la negación de Lean, \lean{¬p := p → False}. La satisfacción de una negación modal será, sin necesidad de demostración, la negación de Lean de la satisfacción, y por eso \lean{satisfies_neg} se cerrará con \lean{rfl}.
 
 \section{El esquema de tautologías}\label{sec:form-tautologias}
 
-AAA
+La evaluación de la definición \ref{def:tautologia} es una recursión inmediata, y ser tautología, una doble cuantificación:
+
+\begin{lstlisting}
+def cplEval (v_atom : VP → Prop) (v_box : ModalFormula VP → Prop) :
+    ModalFormula VP → Prop
+  | ModalFormula.atom x  => v_atom x
+  | ModalFormula.bot     => False
+  | ModalFormula.imp φ ψ => cplEval v_atom v_box φ → cplEval v_atom v_box ψ
+  | ModalFormula.box φ   => v_box φ    -- la caja es un átomo opaco
+
+def IsCPLTautology (φ : ModalFormula VP) : Prop :=
+  ∀ (v_atom : VP → Prop) (v_box : ModalFormula VP → Prop),
+    cplEval v_atom v_box φ
+\end{lstlisting}
+
+Los argumentos \lean{v_atom} y \lean{v_box} son los $v_a$ y $v_\nec$ del papel. La diferencia de fondo es que $\hat v(\varphi)$ tomaba valores en $\{0,1\}$ y \lean{cplEval} devuelve un \lean{Prop}.
+
+En el código no formalizamos ningún resultado general sobre tautologías, sino exactamente las ocho que el desarrollo necesita, recogidas en la tabla \ref{tab:tautologias}. Dos de ellas muestran el mecanismo entero:
+
+\begin{lstlisting}
+theorem taut_id (φ : ModalFormula VP) : IsCPLTautology (φ ⟶ φ) := by
+  intro v_atom v_box hφ
+  exact hφ
+
+theorem taut_dist (φ ψ χ : ModalFormula VP) :
+    IsCPLTautology ((φ ⟶ (ψ ⟶ χ)) ⟶ ((φ ⟶ ψ) ⟶ (φ ⟶ χ))) := by
+  intro v_atom v_box hφψχ hφψ hφ
+  exact hφψχ hφ (hφψ hφ)
+\end{lstlisting}
+
+Tras los dos primeros \lean{intro} la meta es \lean{cplEval v_atom v_box (φ ⟶ φ)}, que no \emph{es} una implicación de Lean pero se reduce a una desplegando \lean{cplEval}; como las tácticas trabajan módulo igualdad definicional, el tercer \lean{intro} funciona sin más. Tres \lean{intro} y un \lean{exact}: la misma demostración que se escribiría para \lean{p → p} en lógica proposicional pura, que es el rendimiento de haber evaluado en \lean{Prop}. En \lean{taut_dist} se aprecia mejor todavía, pues el término \lean{hφψχ hφ (hφψ hφ)} es la demostración entera del axioma A2 de Hilbert.
+
+\begin{table}[htb]
+\centering\footnotesize
+\begin{tabular}{@{}lp{4.6cm}p{4.1cm}@{}}
+\toprule
+Nombre & Enunciado & Dónde se usa \\
+\midrule
+\lean{taut_id}        & $\varphi \limp \varphi$ & teorema de deducción \\
+\lean{taut_weaken}    & $\psi \limp (\varphi \limp \psi)$ & teorema de deducción; \lean{mcs_imp_mem_iff} \\
+\lean{taut_dist}      & $(\varphi \limp (\psi \limp \chi)) \limp$ \newline $((\varphi \limp \psi) \limp (\varphi \limp \chi))$ & teorema de deducción \\
+\lean{taut_dne}       & $\lnot\lnot\varphi \limp \varphi$ & \lean{consistent_insert_neg} \\
+\lean{taut_exfalso}   & $\lnot\varphi \limp (\varphi \limp \psi)$ & \lean{mcs_imp_mem_iff} \\
+\lean{taut_iff_mp}    & $(\varphi \leftrightarrow \psi) \limp (\varphi \limp \psi)$ & regla RE \\
+\lean{taut_iff_mpr}   & $(\varphi \leftrightarrow \psi) \limp (\psi \limp \varphi)$ & regla RE \\
+\lean{taut_iff_intro} & $(\varphi \limp \psi) \limp (\psi \limp \varphi)$ \newline $\limp (\varphi \leftrightarrow \psi)$ & regla RE \\
+\bottomrule
+\end{tabular}
+\caption{Las ocho tautologías clásicas demostradas y el lugar donde se emplean. Las tres primeras son la identidad y los axiomas A1 y A2 de Hilbert, que la proposición \ref{prop:deduccion} necesita.}
+\label{tab:tautologias}
+\end{table}
+
+La eliminación de la doble negación es la primera que necesita lógica clásica:
+
+\begin{lstlisting}
+theorem taut_dne (φ : ModalFormula VP) : IsCPLTautology (∼∼φ ⟶ φ) := by
+  intro v_atom v_box hnn
+  by_contra hn
+  exact hnn hn
+\end{lstlisting}
+
+Aquí se observan consecuencias de nuestra definición de la negación. \lean{cplEval v_atom v_box (∼φ)} se despliega a \lean{cplEval v_atom v_box φ → False}, que es su negación en Lean. La hipótesis \lean{hnn} es una doble negación, y por eso \lean{by_contra} introduce \lean{hn} con el tipo justo para que \lean{hnn hn} demuestre \lean{False}.
+
+Las tres tautologías del bicondicional, en cambio, se dificultan por nuestro lenguaje mínimo. Desplegando definiciones, si $P$ abrevia la evaluación de \lean{φ ⟶ ψ} y $Q$ la de \lean{ψ ⟶ φ}, lo que \lean{cplEval} produce a partir de \lean{φ ⟷ ψ} es $\lnot(P \to \lnot Q)$, que es correcto pero incómodo de manipular.
+
+\begin{lstlisting}
+theorem taut_iff_mp (φ ψ : ModalFormula VP) :
+    IsCPLTautology ((φ ⟷ ψ) ⟶ (φ ⟶ ψ)) := by
+  intro v_atom v_box hiff
+  by_contra hnimp
+  -- hiff niega (φ_eval → ψ_eval) → ¬(ψ_eval → φ_eval); basta probar eso
+  apply hiff
+  intro himp
+  -- himp : φ_eval → ψ_eval contradice hnimp
+  contradiction
+\end{lstlisting}
+
+La meta tras el \lean{intro} es $P$, que no se puede construir directamente, así que se razona por reducción al absurdo. \lean{apply hiff} reduce la meta \lean{False} a demostrar \lean{P → ¬Q}, y una vez introducido \lean{himp : P} el contexto contiene ya \lean{hnimp : ¬P}, de modo que \lean{contradiction} cierra sin llegar a demostrar \lean{¬Q}. Las otras dos siguen el mismo esquema.
 
 \section{El sistema axiomático}\label{sec:form-sistema}
 
-AAA
+La definición \ref{def:sistemaK} describe $\proves\varphi$ como la menor relación cerrada bajo dos axiomas y dos reglas. Eso es una definición inductiva:
+
+\begin{lstlisting}
+inductive Provable : ModalFormula VP → Prop where
+  | cpl (φ : ModalFormula VP) (h : IsCPLTautology φ) : Provable φ
+  | mp  {φ ψ : ModalFormula VP} (hφψ : Provable (φ ⟶ ψ)) (hφ : Provable φ) :
+        Provable ψ
+  | k   (φ ψ : ModalFormula VP) : Provable (□(φ ⟶ ψ) ⟶ (□φ ⟶ □ψ))
+  | nec {φ : ModalFormula VP} (h : Provable φ) : Provable (□φ)
+\end{lstlisting}
+
+Esto es el uso de los tipos inductivos anunciado en la sección \ref{sec:tipos-inductivos}. \lean{Provable} es una familia de proposiciones indexada por fórmulas, y un término de tipo \lean{Provable φ} es un árbol finito de aplicaciones de axiomas y reglas, es decir, una derivación en $\K$. De ahí salen a la vez las cuatro reglas como constructores y el principio de inducción sobre derivaciones, que es lo que hace que la corrección, más adelante, quepa en cuatro líneas. Los tres teoremas \lean{provable_iff_mp}, \lean{provable_iff_mpr} y \lean{provable_iff_intro}, de una línea cada uno, se limitan a convertir teoremas de $\K$ las tautologías del bicondicional mediante \lean{Provable.cpl}.
+
+Las proposiciones \ref{prop:rm} y \ref{prop:re} muestran el parecido entre una demostración en papel y una en Lean:
+
+\begin{lstlisting}
+theorem provable_rm {φ ψ : ModalFormula VP} (hφψ : Provable (φ ⟶ ψ)) :
+    Provable (□φ ⟶ □ψ) := by
+  have hnec : Provable (□(φ ⟶ ψ)) := Provable.nec hφψ          -- necesitación
+  have hK : Provable (□(φ ⟶ ψ) ⟶ (□φ ⟶ □ψ)) := Provable.k φ ψ  -- axioma K
+  exact Provable.mp hK hnec                                      -- modus ponens
+
+theorem provable_re {φ ψ : ModalFormula VP} (h : Provable (φ ⟷ ψ)) :
+    Provable (□φ ⟷ □ψ) := by
+  -- Extraemos ⊢ φ ⟶ ψ y aplicamos RM
+  have hmp : Provable ((φ ⟷ ψ) ⟶ (φ ⟶ ψ)) := provable_iff_mp φ ψ
+  have hφψ : Provable (φ ⟶ ψ) := Provable.mp hmp h
+  have hboxφψ : Provable (□φ ⟶ □ψ) := provable_rm hφψ
+  -- Extraemos ⊢ ψ ⟶ φ y aplicamos RM
+  have hmpr : Provable ((φ ⟷ ψ) ⟶ (ψ ⟶ φ)) := provable_iff_mpr φ ψ
+  have hψφ : Provable (ψ ⟶ φ) := Provable.mp hmpr h
+  have hboxψφ : Provable (□ψ ⟶ □φ) := provable_rm hψφ
+  -- Reensamblamos el bicondicional con dos modus ponens
+  have hintro : Provable ((□φ ⟶ □ψ) ⟶ (□ψ ⟶ □φ) ⟶ (□φ ⟷ □ψ)) :=
+    provable_iff_intro (□φ) (□ψ)
+  have hstep : Provable ((□ψ ⟶ □φ) ⟶ (□φ ⟷ □ψ)) := Provable.mp hintro hboxφψ
+  exact Provable.mp hstep hboxψφ
+\end{lstlisting}
+
+La demostración en papel de la proposición \ref{prop:rm} son tres frases y aquí son tres líneas, en el mismo orden. La correspondencia es el resultado de usar \lean{have} en lugar de un único término anidado. Una versión compacta, \lean{Provable.mp (Provable.k φ ψ) (Provable.nec hφψ)}, sería correcta, ocupa una línea y es la que aparecería en una biblioteca, pero hay que leerla de dentro afuera para reconstruir el argumento.
+
+En \lean{provable_re}, los tres comentarios marcan los tres movimientos de la proposición \ref{prop:re}, y cada \lean{have} lleva su tipo escrito porque, leídos en columna, son la lista de teoremas intermedios del argumento en papel. Los dos últimos pasos hacen visible algo que allí queda tras la frase ``con dos aplicaciones de (MP)'': como en $\K$ no hay regla de introducción de la conjunción, los dos antecedentes de \lean{taut_iff_intro} se consumen de uno en uno.
+
+Conviene subrayar en qué sentido RM y RE son \emph{reglas}. No son constructores de \lean{Provable}, que sigue teniendo cuatro, sino teoremas \emph{sobre} \lean{Provable} demostrados en el metalenguaje. Son reglas admisibles y no primitivas. En Lean es la distinción que hay entre estar dentro o fuera del bloque \lean{inductive}.
 
 \section{La semántica de Kripke}\label{sec:form-semantica}
 
-AAA
+La semántica es donde más se nota que Lean no es teoría de conjuntos. El conjunto de mundos de la definición \ref{def:kripke} se convierte en un tipo, la relación en una función con valores en \lean{Prop}, y la satisfacción de la definición \ref{def:satisfaccion} en una recursión estructural:
+
+\begin{lstlisting}
+structure KripkeFrame where
+  World : Type
+  R : World → World → Prop
+
+structure KripkeModel (VP : Type) extends KripkeFrame where
+  V : World → VP → Prop
+
+def Satisfies (M : KripkeModel VP) (w : M.World) : ModalFormula VP → Prop
+  | ModalFormula.atom x  => M.V w x
+  | ModalFormula.bot     => False
+  | ModalFormula.imp φ ψ => Satisfies M w φ → Satisfies M w ψ
+  | ModalFormula.box φ   => ∀ v : M.World, M.R w v → Satisfies M v φ
+\end{lstlisting}
+
+Que \lean{World} sea un \lean{Type} y no un \lean{Set} es forzoso, puesto que un conjunto en Lean es siempre subconjunto de un tipo previo, y aquí no hay ninguno del que los mundos deban formar parte. La consecuencia se verá en la subsección \ref{subsec:comp-mod}, donde habrá que fabricar un tipo cuyos elementos sean exactamente los MCS. En el campo \lean{V} se recoge la adaptación anunciada en la sección \ref{sec:kripke-mat}: como \lean{Set VP} es por definición \lean{VP → Prop}, escribir la valoración como $V \colon W \to \mathcal{P}(\mathsf{VP})$, y no al revés como hace Blackburn, la convierte en el tipo declarado.
 
 \begin{observacion}\label{obs:vacio}
 
 No exigimos que \lean{World} sea no vacío, a diferencia de la definición
 \ref{def:kripke}. Sobre el modelo (único) con tipo de mundos vacío toda
-fórmula es válida vacuamente, lo cual es inofensivo: la validez cuantifica
+fórmula es válida vacuamente, lo cual es inofensivo. La validez cuantifica
 sobre \emph{todos} los modelos, y sobra con que exista alguno no vacío para
 que $\bot$ no sea válida. A cambio, las definiciones quedan más limpias (sin
 arrastrar una prueba de no vacuidad) y los teoremas, marginalmente más
 generales.
 \end{observacion}
 
+En \lean{Satisfies}, las tres primeras cláusulas coinciden con las de \lean{cplEval} salvo por la valoración empleada, y la cuarta es la única que cambia. Donde la evaluación clásica devolvía un valor opaco, la satisfacción abre la caja y cuantifica sobre los mundos accesibles. Toda la diferencia entre la lógica proposicional y la modal cabe en esa línea, y que las otras tres coincidan es lo que hará posible el lema puente. Justifica además la elección de $\nec$ como primitivo (sección \ref{sec:sintaxis-mat}) puesto que su semántica es un universal, y un universal en Lean es una función, que se usa aplicándola y se demuestra con \lean{intro}, mientras que la cláusula dual de $\pos$ sería un existencial, que exige exhibir un testigo para construirlo y descomponerlo para usarlo.
+
+Veamos ahora que las conectivas derivadas reciben el significado esperado. El primero es
+
+\begin{lstlisting}
+theorem satisfies_neg (M : KripkeModel VP) (w : M.World) (p : ModalFormula VP) :
+    Satisfies M w (∼p) ↔ ¬ Satisfies M w p := by
+  rfl   -- ambos lados se despliegan a Satisfies M w p → False
+\end{lstlisting}
+
+Una sola táctica, y de las que no hacen nada porque los dos lados son definicionalmente iguales, que es consecuencia de haber imitado la negación de Lean. El segundo, \lean{satisfies_dia}, dice que \lean{Satisfies M w (◇p)} equivale a que exista un mundo accesible donde valga \lean{p}, y es el caso opuesto. Su lado izquierdo se despliega a
+
+\begin{leansnippet}
+(∀ v, M.R w v → (Satisfies M v p → False)) → False,
+\end{leansnippet}
+
+y pasar de ahí al existencial es la inferencia $\lnot\forall x\,\lnot P(x) \Rightarrow \exists x\, P(x)$, no demostrable intuicionistamente. La dirección directa es clásica: tras \lean{by_contra}, un \lean{apply} sobre la hipótesis reduce la meta \lean{False} a demostrar que \lean{p} falla en todo mundo accesible, y los tres datos que entonces se introducen son exactamente el testigo que la hipótesis del absurdo niega. La recíproca se resuelve en dos líneas.
+
+Los tres niveles de la definición \ref{def:validez} se declaran a continuación:
+
+\begin{lstlisting}
+def ValidInModel (M : KripkeModel VP) (φ : ModalFormula VP) : Prop :=
+  ∀ w : M.World, Satisfies M w φ
+
+def ValidInFrame (F : KripkeFrame) (φ : ModalFormula VP) : Prop :=
+  ∀ V : F.World → VP → Prop, ValidInModel { toKripkeFrame := F, V := V } φ
+
+def Valid (φ : ModalFormula VP) : Prop :=
+  ∀ M : KripkeModel VP, ValidInModel M φ
+\end{lstlisting}
+
+La segunda, \lean{ValidInFrame}, no se usa después, pero completa la definición \ref{def:validez} y es la que haría falta para seguir hacia lógicas más fuertes.
+
 \section{El teorema de corrección}\label{sec:form-correccion}
 
-AAA
+La corrección es la dirección sencilla, y su demostración por inducción sobre derivaciones ocupa cuatro líneas. Casi todo el trabajo está en el lema puente \ref{lem:puente}, que en el capítulo \ref{sec:logicamodal} se demostraba en cinco renglones y que aquí es el resultado más laborioso de la sección. Es un buen ejemplo del desajuste entre el esfuerzo en papel y el formal, y el propio Blackburn lo deja como ejercicio.
+
+\begin{lstlisting}
+theorem cplEval_iff_satisfies (M : KripkeModel VP) (w : M.World)
+    (φ : ModalFormula VP) :
+    cplEval (fun x => M.V w x) (fun ψ => Satisfies M w (□ψ)) φ ↔
+      Satisfies M w φ := by
+  induction φ with
+  | atom x => rfl
+  | bot => rfl
+  | imp φ ψ ihφ ihψ =>
+      -- El objetivo es (A₁ → B₁) ↔ (A₂ → B₂) con ihφ : A₁ ↔ A₂ e ihψ : B₁ ↔ B₂
+      apply Iff.intro
+      · intro h hφ
+        exact ihψ.mp (h (ihφ.mpr hφ))
+      · ...
+  | box φ ih =>
+      -- cplEval (□φ) es v_box φ, elegida como Satisfies M w (□φ): no se usa ih
+      rfl
+\end{lstlisting}
+
+De los cuatro casos, tres se cierran con \lean{rfl}. El de la caja es el significativo: que sea \lean{rfl} quiere decir que \lean{v_box} se eligió para que lo fuera, pero además la hipótesis de inducción no se usa. En papel, la demostración del lema \ref{lem:puente} dice ``el caso $\nec\psi$ se cumple por la propia definición de $v_\nec$, sin usar la hipótesis de inducción, que es exactamente lo que expresa la opacidad''. En Lean esa frase se vuelve un hecho verificable, pues el nombre \lean{ih} aparece en el patrón y no vuelve a aparecer.
+
+La opacidad de la caja, que era una observación conceptual, se ha convertido en una hipótesis no utilizada. El único caso con trabajo es la implicación, y su dificultad es combinatoria. Hay que dividir el bicondicional y componer las hipótesis de inducción en el sentido adecuado en cada dirección, el detalle que en papel se resuelve con la palabra ``análogamente''. Nótese que la inducción no necesita \lean{generalizing}, porque el modelo y el mundo están fijados desde el enunciado; es la diferencia con el lema de verdad.
+
+Para ver que las tautologías clásicas son válidas, basta con instanciar la hipótesis, que es un $\forall$ sobre valoraciones, en las dos extraídas de \lean{w}, y aplicar el lema puente. Los otros tres casos son cortos:
+
+\begin{lstlisting}
+theorem valid_axiom_k (φ ψ : ModalFormula VP) :
+    Valid (□(φ ⟶ ψ) ⟶ (□φ ⟶ □ψ)) := by
+  intro M w hboximp hboxφ v hRv
+  exact hboximp v hRv (hboxφ v hRv)
+
+theorem valid_nec {φ : ModalFormula VP} (hφ : Valid φ) : Valid (□φ) := by
+  intro M w v hRv
+  exact hφ M v
+\end{lstlisting}
+
+Los seis nombres del primer \lean{intro} recorren de una vez los seis niveles del enunciado, hasta el mundo accesible que introduce la caja del consecuente; el ``modus ponens mundo a mundo'' del ejemplo \ref{ej:k-valido} es un párrafo del papel en una línea.
+
+En \lean{valid_nec} conviene mirar qué \emph{no} se usa. Si nos fijamos, la meta se cierra sin mencionar \lean{w} ni \lean{hRv}, porque la validez vale en todos los mundos y da igual desde dónde se llegue. Ese ``da igual desde dónde'' es la razón por la que la necesitación preserva la validez pero no la verdad en un mundo, la advertencia de la sección \ref{sec:sistemaK} y la observación \ref{obs:sin-necesitacion}.
+
+Con las piezas separadas, el teorema de corrección es un ensamblaje:
+
+\begin{lstlisting}
+theorem soundness {φ : ModalFormula VP} (h : Provable φ) : Valid φ := by
+  induction h with
+  | cpl φ htaut        => exact valid_of_cpl_tautology htaut
+  | mp hφψ hφ ihφψ ihφ => exact valid_mp ihφψ ihφ
+  | k φ ψ              => exact valid_axiom_k φ ψ
+  | nec h ih           => exact valid_nec ih
+\end{lstlisting}
+
+La táctica \lean{induction h} abre un caso por constructor, es decir, uno por axioma y por regla. En los de las reglas, Lean proporciona tanto las subderivaciones como las hipótesis de inducción, y la demostración usa solo estas últimas, porque lo que hace falta no es la derivación sino la validez que se le supone. El esquema ``los axiomas son válidos y las reglas preservan la validez, luego todo teorema es válido'' está escrito con esas cuatro líneas y nada más.
+
+Como corolario, el sistema no demuestra $\bot$. Hace falta un modelo concreto, y nosotros construimos \lean{trivialModel}, con \lean{World := Unit}, \lean{R := fun _ _ => False} y \lean{V := fun _ _ => False}: un solo mundo, ninguna flecha y ninguna variable verdadera.
+
+\begin{lstlisting}
+theorem k_consistent : ¬ Provable (ModalFormula.bot : ModalFormula VP) := by
+  intro hprov
+  have hsat : Satisfies (trivialModel VP) () ModalFormula.bot :=
+    soundness hprov (trivialModel VP) ()
+  exact hsat   -- Satisfies _ _ ⊥ es False por definición
+\end{lstlisting}
+
+Observamos que el cierre de la demostración es particular. La meta es \lean{False} y se cierra con una hipótesis cuyo tipo es una satisfacción. No hay ningún paso oculto, porque la segunda cláusula de \lean{Satisfies} dice que la satisfacción de \lean{ModalFormula.bot} \emph{es} \lean{False}. Una demostración de que $\bot$ es verdadera en algún mundo es, simplemente, una demostración de lo imposible. Y aquí es donde hacía falta un modelo con al menos un mundo, según la observación \ref{obs:vacio}.
 
 \section{El teorema de completitud}\label{sec:form-completitud}
 
-AAA
+La completitud ocupa aproximadamente la mitad del código del fichero porque, a diferencia de la corrección, tenemos que fabricar un modelo a partir de material puramente sintáctico. El desarrollo se organiza en las seis subsecciones que siguen.
 
 \subsection{Deducción a partir de hipótesis}\label{subsec:comp-ded}
 
-AAA
+La relación $\Gamma \proves \varphi$ de la definición \ref{def:deducible} se declara, igual que \lean{Provable}, como un tipo inductivo:
+
+\begin{lstlisting}
+inductive DeducibleFrom (Γ : Set (ModalFormula VP)) :
+    ModalFormula VP → Prop where
+  | ax  {φ : ModalFormula VP} (h : Provable φ) : DeducibleFrom Γ φ
+  | mem {φ : ModalFormula VP} (h : φ ∈ Γ) : DeducibleFrom Γ φ
+  | mp  {φ ψ : ModalFormula VP} (hφψ : DeducibleFrom Γ (φ ⟶ ψ))
+        (hφ : DeducibleFrom Γ φ) : DeducibleFrom Γ ψ
+\end{lstlisting}
+
+El conjunto \lean{Γ} va antes de los dos puntos, como parámetro, y la fórmula después, como índice. Un parámetro permanece fijo en todos los constructores y en el principio de inducción, mientras que un índice puede variar, que es justo lo que hace falta, pues en una deducción las hipótesis no cambian de un paso a otro pero la fórmula deducida sí.
+
+Lo más importante de la declaración es lo que \emph{no} contiene. No hay constructor para la necesitación. Su ausencia es deliberada como se razonaba en la observación \ref{obs:sin-necesitacion}. Admitir que de $\Gamma \proves \varphi$ se sigue $\Gamma \proves \nec\varphi$ sería un error, porque las hipótesis pueden ser verdades contingentes. Con la definición de Blackburn por conjunciones finitas el error es imposible por construcción, con una definición inductiva hay que excluirlo a mano, y la necesitación entra en las deducciones solo por la vía de \lean{ax}.
+
+Dos lemas preliminares son inducciones de tres líneas. La monotonía (\lean{deducibleFrom_mono}) rehace la misma deducción sobre un conjunto mayor, y solo el caso \lean{mem} hace algo. El otro, \lean{provable_of_deducibleFrom_empty}, establece la mitad no trivial de la coincidencia $\emptyset \proves \varphi \iff \proves \varphi$ que la sección \ref{sec:mapa-completitud} daba por descontada al sobrecargar el símbolo $\proves$; su caso \lean{mem} es el único uso de \lean{simp} en todo el fichero, para descartar la hipótesis imposible \lean{φ ∈ ∅}.
+
+La proposición \ref{prop:deduccion} es el primer resultado con contenido, y el modelo de todas las inducciones sobre derivaciones que vendrán después:
+
+\begin{lstlisting}
+theorem deduction_theorem {Γ : Set (ModalFormula VP)} {φ ψ : ModalFormula VP}
+    (h : DeducibleFrom (insert φ Γ) ψ) : DeducibleFrom Γ (φ ⟶ ψ) := by
+  induction h with
+  | @ax χ hχ =>
+      -- χ es un teorema: lo debilitamos con la tautología χ ⟶ (φ ⟶ χ)
+      have hweak : DeducibleFrom Γ (χ ⟶ (φ ⟶ χ)) :=
+        DeducibleFrom.ax (Provable.cpl _ (taut_weaken χ φ))
+      exact DeducibleFrom.mp hweak (DeducibleFrom.ax hχ)
+  | @mem χ hχ =>
+      -- χ es hipótesis de insert φ Γ: o es la propia φ, o ya estaba en Γ
+      rcases Set.mem_insert_iff.mp hχ with heq | hmem
+      · subst heq   -- χ = φ: basta la identidad φ ⟶ φ
+        exact DeducibleFrom.ax (Provable.cpl _ (taut_id _))
+      · ...         -- χ ∈ Γ: se repite el debilitamiento del caso ax
+  | @mp χ ξ _ _ ihχξ ihχ =>
+      -- ihχξ : Γ ⊢ φ ⟶ (χ ⟶ ξ) e ihχ : Γ ⊢ φ ⟶ χ; la tautología A2 las combina
+      have hdist : DeducibleFrom Γ ((φ ⟶ (χ ⟶ ξ)) ⟶ ((φ ⟶ χ) ⟶ (φ ⟶ ξ))) :=
+        DeducibleFrom.ax (Provable.cpl _ (taut_dist φ χ ξ))
+      exact DeducibleFrom.mp (DeducibleFrom.mp hdist ihχξ) ihχ
+\end{lstlisting}
+
+La arroba de \lean{| @ax χ hχ} es la notación de la sección \ref{sec:escribir-lean}. El patrón necesita nombrar la fórmula, que el constructor declara implícita, y no puede llamarla \lean{ψ} porque ese nombre ya está tomado por el enunciado. Los tres casos reproducen los tres párrafos de la demostración de la proposición \ref{prop:deduccion}; obsérvese en el primero cómo se encadenan tres niveles en una sola expresión: una tautología clásica, convertida a teorema de $\K$ por (CPL), convertida a deducción desde \lean{Γ} por (ax).
+
+El caso \lean{mem} se ramifica y deja ver algo característico del trabajo de formalización: en papel, la proposición \ref{prop:deduccion} despacha juntos los casos (ax) y (hip) con $\psi \in \Gamma$, porque en ambos se dispone de $\Gamma \proves \psi$ sin importar de dónde venga, mientras que en Lean son casos distintos por venir de constructores distintos y el mismo bloque de tres líneas hay que escribirlo dos veces.
 
 \subsection{Consistencia y conjuntos maximales consistentes}\label{subsec:comp-cons}
 
-AAA
+La definición \ref{def:consistente} da lugar a dos declaraciones:
+
+\begin{lstlisting}
+def Consistent (Γ : Set (ModalFormula VP)) : Prop :=
+  ¬ DeducibleFrom Γ ModalFormula.bot
+
+def MaximalConsistent (Γ : Set (ModalFormula VP)) : Prop :=
+  Consistent Γ ∧ ∀ Δ : Set (ModalFormula VP), Consistent Δ → Γ ⊆ Δ → Δ ⊆ Γ
+\end{lstlisting}
+
+La primera ilustra por qué conviene separar las notaciones de los dos lenguajes. El \lean{¬} es del metalenguaje y afirma que cierta deducción no existe, mientras que \lean{ModalFormula.bot} es un dato y con los mismos símbolos, la definición parecería decir algo sobre la fórmula $\lnot\bot$.
+
+La segunda expresa ``ningún consistente lo contiene estrictamente'' por el camino contrapuesto. Esta forma de expresarlo es la que usa el lema de Zorn de Mathlib que devuelve la maximalidad, de modo que el resultado de Zorn encajará sin traducir nada. En lo que sigue, \lean{hΓ.1} es ``$\Gamma$ es consistente'' y \lean{hΓ.2}, ``$\Gamma$ es maximal''.
+
+Que el vacío es consistente se sigue en dos líneas de \lean{k_consistent}. El siguiente lema es pequeño y se usa en los dos momentos decisivos del argumento:
+
+\begin{lstlisting}
+theorem consistent_insert_neg {Γ : Set (ModalFormula VP)} {φ : ModalFormula VP}
+    (h : ¬ DeducibleFrom Γ φ) : Consistent (insert (∼φ) Γ) := by
+  intro hbot
+  -- Teorema de deducción: Γ ⊢ ∼φ ⟶ ⊥, que por definición es ∼∼φ
+  have hdneg : DeducibleFrom Γ (∼∼φ) := deduction_theorem hbot
+  have hdne : DeducibleFrom Γ (∼∼φ ⟶ φ) :=
+    DeducibleFrom.ax (Provable.cpl _ (taut_dne φ))
+  exact h (DeducibleFrom.mp hdne hdneg)
+\end{lstlisting}
+
+Es interesante detenernos en el uso del primer \lean{have}. El término \lean{deduction_theorem hbot} no tiene el tipo declarado, sino \lean{DeducibleFrom Γ (∼φ ⟶ ModalFormula.bot)}; Lean lo acepta porque los dos son definicionalmente iguales tomando \lean{α := ∼φ} en \lean{∼α := α ⟶ ModalFormula.bot}. Escribir el tipo en la forma que tiene sentido matemático  hace legible la demostración y así el código dice lo que uno quiere decir y Lean comprueba que coincide con lo que hay.
+
+Las tres propiedades de la proposición \ref{prop:mcs}, las que convierten un MCS en la descripción completa de un mundo, se demuestran a continuación. La primera demuestra que $\Gamma$ está deductivamente cerrado:
+
+\begin{lstlisting}
+theorem mcs_mem_of_deducible {Γ : Set (ModalFormula VP)}
+    (hΓ : MaximalConsistent Γ) {φ : ModalFormula VP} (h : DeducibleFrom Γ φ) :
+    φ ∈ Γ := by
+  -- insert φ Γ es consistente: si dedujera ⊥, Γ ⊢ φ ⟶ ⊥ y Γ ⊢ φ darían Γ ⊢ ⊥
+  have hcons : Consistent (insert φ Γ) := by
+    intro hbot
+    have himp : DeducibleFrom Γ (φ ⟶ ModalFormula.bot) := deduction_theorem hbot
+    exact hΓ.1 (DeducibleFrom.mp himp h)
+  -- Por maximalidad, insert φ Γ ⊆ Γ; en particular, φ ∈ Γ
+  exact hΓ.2 (insert φ Γ) hcons (Set.subset_insert φ Γ) (Set.mem_insert φ Γ)
+\end{lstlisting}
+
+Junto con el constructor \lean{DeducibleFrom.mem}, que da la implicación recíproca, este lema establece que para un MCS pertenecer y ser deducible son la misma cosa que es lo que permite tratarlo como una valoración. Las otras dos propiedades siguen el mismo patrón y sus enunciados son
+
+\begin{leansnippet}
+theorem mcs_mem_or_neg_mem ... (φ : ModalFormula VP) : φ ∈ Γ ∨ ∼φ ∈ Γ
+theorem mcs_neg_mem_iff ... (φ : ModalFormula VP) : ∼φ ∈ Γ ↔ φ ∉ Γ
+theorem mcs_imp_mem_iff ... : (φ ⟶ ψ) ∈ Γ ↔ (φ ∈ Γ → ψ ∈ Γ)
+\end{leansnippet}
+
+El primero es una distinción de casos con \lean{by_cases} sobre si \lean{Γ} deduce \lean{φ}. El uso de esa táctica que anunciaba la sección \ref{sec:tacticas} es que la disyunción no viene de ninguna hipótesis previa sino del tercero excluido.
+
+El segundo la convierte en excluyente, y su dirección directa vuelve a aprovechar la definición de la negación, pues tener \lean{∼φ} y \lean{φ} en \lean{Γ} permite un modus ponens que produce $\Gamma \proves \bot$ sin ningún paso intermedio.
+
+El tercero es el que usará el lema de verdad. Su demostración emplea las dos tautologías que faltaban: la dirección directa es un modus ponens seguido de la consideración de que $\Gamma$ es deductivamente cerrado, y la recíproca se ramifica según \lean{φ} pertenezca o no, construyendo la implicación con \lean{taut_weaken} a partir del consecuente en un caso y con \lean{taut_exfalso} a partir de \lean{∼φ} en el otro. Son los dos casos en que una implicación es verdadera, aquí manifestados como los dos casos de un \lean{by_cases}.
 
 \subsection{El lema de Lindenbaum, vía Zorn}\label{subsec:comp-lind}
 
-AAA
+Aquí la formalización se separa conscientemente de \cite{blackburn}. Donde Blackburn enumera las fórmulas y las añade una a una, lo que exige que el lenguaje sea numerable, nosotros aplicamos el lema de Zorn a la familia de los conjuntos consistentes. Esa es la razón, anunciada en la sección \ref{sec:sintaxis-mat}, por la que la definición \ref{def:lenguaje} no impone ninguna condición sobre $\mathsf{VP}$.
+
+Aplicar Zorn exige comprobar que la unión de una cadena de conjuntos consistentes es consistente. En papel el argumento es una frase: ``si $\bigcup \mathcal{C} \proves \bot$, entonces, como toda deducción usa un número finito de hipótesis y $\mathcal{C}$ está totalmente ordenada por inclusión, todas ellas caben en un mismo eslabón''. Esa frase esconde un hecho que hay que demostrar,que nosotros debemos aislar como lema previo:
+
+\begin{lstlisting}
+theorem deducibleFrom_sUnion_chain {c : Set (Set (ModalFormula VP))}
+    (hchain : IsChain (· ⊆ ·) c) (hne : c.Nonempty) {φ : ModalFormula VP}
+    (h : DeducibleFrom (⋃₀ c) φ) : ∃ Δ ∈ c, DeducibleFrom Δ φ := by
+  induction h with
+  | @ax χ hχ =>
+      -- Un teorema se deduce desde cualquier eslabón, y la cadena no es vacía
+      obtain ⟨Δ, hΔ⟩ := hne
+      exact ⟨Δ, hΔ, DeducibleFrom.ax hχ⟩
+  | @mem χ hχ => ...          -- la hipótesis pertenece a algún eslabón
+  | @mp χ ξ _ _ ihχξ ihχ =>
+      -- Cada premisa vive en su propio eslabón...
+      obtain ⟨Δ₁, hΔ₁, hd₁⟩ := ihχξ
+      obtain ⟨Δ₂, hΔ₂, hd₂⟩ := ihχ
+      -- ...y, al estar encadenados, ambas caben en el mayor de los dos
+      rcases eq_or_ne Δ₁ Δ₂ with rfl | hneq
+      · exact ⟨_, hΔ₁, DeducibleFrom.mp hd₁ hd₂⟩
+      · rcases hchain hΔ₁ hΔ₂ hneq with hsub | hsub
+        · exact ⟨Δ₂, hΔ₂, DeducibleFrom.mp (deducibleFrom_mono hsub hd₁) hd₂⟩
+        · exact ⟨Δ₁, hΔ₁, DeducibleFrom.mp hd₁ (deducibleFrom_mono hsub hd₂)⟩
+\end{lstlisting}
+
+Es un punto del código donde la formalización muestra las diferencias entre demostrar en papel y en Lean. Si nos fijamos, en ninguna parte se habla de finitud. La demostración en papel invoca que ``toda deducción usa un número finito de hipótesis'', un hecho que requiere a su vez una inducción sobre derivaciones y una definición del conjunto de hipótesis efectivamente usadas. Aquí se sustituye por una inducción directa en la que cada caso produce el eslabón que hace falta: en \lean{ax} sirve cualquiera, en \lean{mem} el que contiene la hipótesis, y en \lean{mp} hay dos, uno por premisa, que la cadena garantiza comparados y la monotonía funde en uno. La finitud del razonamiento informal está repartida a lo largo del árbol de derivación.
+
+Dos detalles más. El caso \lean{ax} no puede concluir sin exhibir algún eslabón, lo que obliga a pedir \lean{hne} y explica por qué la versión de Zorn de Mathlib exige que las cadenas sean no vacías. Además \lean{IsChain} compara elementos distintos, de modo que antes de usarla hay que descartar con \lean{eq_or_ne} que los dos eslabones coincidan. En papel nadie se plantea ese caso, porque ``el mayor de los dos'' incluye tácitamente que puedan ser el mismo. En Lean, se debe ser exhaustivo.
+
+Con ese lema, Lindenbaum es la aplicación de Zorn:
+
+\begin{lstlisting}
+theorem lindenbaum {Γ : Set (ModalFormula VP)} (hΓ : Consistent Γ) :
+    ∃ Δ : Set (ModalFormula VP), Γ ⊆ Δ ∧ MaximalConsistent Δ := by
+  -- Condición de cadenas que exige zorn_subset_nonempty
+  have hchains : ∀ c ⊆ {Θ : Set (ModalFormula VP) | Consistent Θ},
+      IsChain (· ⊆ ·) c → c.Nonempty →
+      ∃ ub ∈ {Θ : Set (ModalFormula VP) | Consistent Θ}, ∀ Δ ∈ c, Δ ⊆ ub := by
+    intro c hcS hchain hne
+    refine ⟨⋃₀ c, ?_, fun Δ hΔ => Set.subset_sUnion_of_mem hΔ⟩
+    intro hbot
+    obtain ⟨Δ, hΔc, hΔbot⟩ := deducibleFrom_sUnion_chain hchain hne hbot
+    exact hcS hΔc hΔbot
+  obtain ⟨Δ, hΓΔ, hΔmax⟩ :=
+    zorn_subset_nonempty {Θ : Set (ModalFormula VP) | Consistent Θ} hchains Γ hΓ
+  -- El maximal que devuelve Zorn es exactamente un MCS según la definición
+  refine ⟨Δ, hΓΔ, hΔmax.1, ?_⟩
+  intro Θ hΘ hsubΘ
+  exact hΔmax.2 hΘ hsubΘ
+\end{lstlisting}
+
+La demostración tiene tres partes. La primera es el \lean{have hchains}, que comprueba lo que \lean{zorn_subset_nonempty} pide para poder aplicarse: que toda cadena no vacía de conjuntos consistentes tiene una cota superior que también es consistente. Su enunciado está copiado del que aparece en el teorema de Mathlib (sección \ref{sec:mathlib}), cambiando la familia genérica por la nuestra. Dentro, el \lean{refine} propone la unión de la cadena como cota superior y demuestra sobre la marcha lo inmediato, que cada eslabón está contenido en ella. Queda por ver que esa unión es consistente, y de eso se encarga el lema anterior en una línea.
+
+La segunda parte es la llamada a Zorn, que devuelve un conjunto \lean{Δ} que contiene a \lean{Γ} y es maximal dentro de la familia.
+
+La tercera comprueba que ese \lean{Δ} es lo que buscábamos, y es donde se aprovecha la forma en que definimos \lean{MaximalConsistent} en la subsección \ref{subsec:comp-cons}. El predicado \lean{Maximal} de Mathlib es una conjunción de dos afirmaciones: que \lean{Δ} pertenece a la familia, es decir, que es consistente, y que cualquier conjunto consistente que lo contenga está contenido en él. las dos que pide nuestra definición, de modo que la primera se entrega tal cual con \lean{hΔmax.1}. La segunda necesita un \lean{intro} y un \lean{exact} por un motivo técnico, que Mathlib deja implícito el conjunto cuantificado y nosotros lo escribimos explícito.
 
 \subsection{El modelo canónico y el lema de encajonado}\label{subsec:comp-mod}
 
-AAA
+Los mundos del modelo canónico son los conjuntos maximales consistentes, y traducir eso exige un tipo cuyos elementos sean exactamente esos conjuntos: el subtipo.
+
+\begin{lstlisting}
+def canonicalModel (VP : Type) : KripkeModel VP where
+  World := { Γ : Set (ModalFormula VP) // MaximalConsistent Γ }
+  R := fun Γ Δ => ∀ ψ : ModalFormula VP, □ψ ∈ Γ.val → ψ ∈ Δ.val
+  V := fun Γ x => ModalFormula.atom x ∈ Γ.val
+\end{lstlisting}
+
+Los elementos de un subtipo son pares de un valor y una demostración, construidos con \lean{⟨Γ, hΓ⟩} y descompuestos con \lean{.val} y \lean{.property}. Un mundo canónico no es, pues, un conjunto de fórmulas, sino un conjunto \emph{acompañado de la demostración} de que es maximal consistente. Es un coste de notación pero el beneficio es que la maximalidad está siempre disponible sin pasarla como hipótesis.
+
+Para el lema de existencia necesitamos que las deducciones se pueden ``encajonar''. El esbozo del lema \ref{lem:existencia} lo resolvía con ``toda la deducción puede encajonarse usando el axioma (K) y la necesitación''. De nuevo, en Lean cada regla se encajona por separado:
+
+\begin{lstlisting}
+theorem deducibleFrom_box {Γ : Set (ModalFormula VP)} {φ : ModalFormula VP}
+    (h : DeducibleFrom {ψ : ModalFormula VP | □ψ ∈ Γ} φ) :
+    DeducibleFrom Γ (□φ) := by
+  induction h with
+  | @ax χ hχ =>
+      -- χ es un teorema de K: por necesitación, □χ también lo es
+      exact DeducibleFrom.ax (Provable.nec hχ)
+  | @mem χ hχ =>
+      -- hχ dice, leído con cuidado, exactamente que □χ ∈ Γ
+      exact DeducibleFrom.mem hχ
+  | @mp χ ξ _ _ ihχξ ihχ =>
+      have hK : DeducibleFrom Γ (□(χ ⟶ ξ) ⟶ (□χ ⟶ □ξ)) :=
+        DeducibleFrom.ax (Provable.k χ ξ)
+      exact DeducibleFrom.mp (DeducibleFrom.mp hK ihχξ) ihχ
+\end{lstlisting}
+
+El caso \lean{ax} es el único lugar de toda la completitud donde se usa la necesitación, y es lícito precisamente porque \lean{ax} solo admite teoremas de $\K$. El caso \lean{mem} es engañosamente breve, pues la hipótesis y la meta encajan sin ningún paso. Esto ocurre porque la notación de conjuntos por comprensión es en Lean una función, \lean{\{ψ | P ψ\}} es \lean{fun ψ => P ψ}, y la pertenencia es la aplicación. El caso \lean{mp} es donde se ve para qué sirve el axioma (K) pues sin él, el encajonado no atravesaría el modus ponens.
 
 \subsection{Los lemas de existencia y de verdad}\label{subsec:comp-ver}
 
-AAA
+El lema de existencia \ref{lem:existencia} construye, para cada MCS que no contenga $\nec\varphi$, un mundo accesible donde $\varphi$ falla:
+
+\begin{lstlisting}
+theorem existence_lemma {Γ : Set (ModalFormula VP)} (hΓ : MaximalConsistent Γ)
+    {φ : ModalFormula VP} (hbox : □φ ∉ Γ) :
+    ∃ Δ : Set (ModalFormula VP),
+      MaximalConsistent Δ ∧ (∀ ψ : ModalFormula VP, □ψ ∈ Γ → ψ ∈ Δ) ∧
+        φ ∉ Δ := by
+  -- (1) φ no se deduce de las obligaciones (encajonado más clausura deductiva)
+  have hnφ : ¬ DeducibleFrom {ψ : ModalFormula VP | □ψ ∈ Γ} φ := by
+    intro hdφ
+    exact hbox (mcs_mem_of_deducible hΓ (deducibleFrom_box hdφ))
+  -- (2) Añadir ∼φ a las obligaciones conserva la consistencia
+  have hcons : Consistent (insert (∼φ) {ψ : ModalFormula VP | □ψ ∈ Γ}) :=
+    consistent_insert_neg hnφ
+  -- (3) Lindenbaum extiende ese conjunto a un MCS Δ
+  obtain ⟨Δ, hsub, hΔ⟩ := lindenbaum hcons
+  refine ⟨Δ, hΔ, ?_, ?_⟩
+  ...   -- las dos comprobaciones restantes, rutinarias
+\end{lstlisting}
+
+Nótese que el enunciado no menciona el modelo canónico. La accesibilidad va desplegada y los conjuntos sin empaquetar en subtipos, para que el lema sea puramente sintáctico y no haya que arrastrar \lean{.val} y \lean{.property} por una demostración que no los necesita. Los tres pasos comentados son el esbozo del lema \ref{lem:existencia} en el mismo orden, y el \lean{refine} escribe directamente la parte ``creativa'', el testigo del existencial, dejando como huecos dos comprobaciones rutinarias: que $\Delta$ contiene las obligaciones de $\Gamma$, porque ya estaban en el conjunto que Lindenbaum extendió, y que $\varphi \notin \Delta$, porque $\mathord{\sim}\varphi \in \Delta$.
+
+El lema de verdad es el resultado central de la sección y el punto donde converge todo lo anterior:
+
+\begin{lstlisting}
+theorem truth_lemma (φ : ModalFormula VP) (Γ : (canonicalModel VP).World) :
+    Satisfies (canonicalModel VP) Γ φ ↔ φ ∈ Γ.val := by
+  induction φ generalizing Γ with
+  | atom x => exact Iff.rfl        -- por definición de la valoración canónica
+  | bot => ...                     -- ⊥ ni se satisface ni cabe en un consistente
+  | imp φ ψ ihφ ihψ =>
+      -- Ambos lados son implicaciones; las hipótesis de inducción las cruzan
+      constructor
+      · intro hsat
+        apply (mcs_imp_mem_iff Γ.property).mpr
+        intro hφ
+        exact (ihψ Γ).mp (hsat ((ihφ Γ).mpr hφ))
+      · intro hmem hφ
+        exact (ihψ Γ).mpr ((mcs_imp_mem_iff Γ.property).mp hmem ((ihφ Γ).mp hφ))
+  | box φ ih =>
+      constructor
+      · -- (⟹) Por reducción al absurdo, con el lema de existencia
+        intro hsat
+        by_contra hbox
+        obtain ⟨Δ, hΔmcs, hR, hnφ⟩ := existence_lemma Γ.property hbox
+        exact hnφ ((ih ⟨Δ, hΔmcs⟩).mp (hsat ⟨Δ, hΔmcs⟩ hR))
+      · -- (⟸) La accesibilidad canónica reparte φ a todo mundo accesible
+        intro hbox Δ hR
+        exact (ih Δ).mpr (hR φ hbox)
+\end{lstlisting}
+
+Lo primero es explicar \lean{generalizing}, cuya justificación aplazamos desde la sección \ref{sec:tacticas}. La inducción es sobre la fórmula, pero el enunciado depende también del mundo, y el mundo cambia dentro de la inducción. En el caso de la caja hay que aplicar la hipótesis de inducción en un \lean{Δ} distinto del \lean{Γ} de partida. Con \lean{induction φ} a secas, esa hipótesis quedaría fijada al \lean{Γ} del contexto y solo diría ``para esta subfórmula y \emph{este} mundo''. Añadiendo \lean{generalizing Γ}, Lean saca el mundo del contexto antes de aplicar el principio de inducción y las hipótesis quedan cuantificadas universalmente sobre él. Por eso en el cuerpo se escriben \lean{ihφ Γ}, \lean{ihψ Γ}, \lean{ih Δ}. Es la contrapartida formal de enunciar la hipótesis de inducción ``para todo mundo'' que en papel se hace sin pensarlo, y aquí hay que decirlo.
+
+El caso de las variables es \lean{Iff.rfl}, y el de $\bot$ usa la consistencia del mundo, \lean{Γ.property.1}, que no hay que suponer porque viene incorporada en el subtipo. El de la implicación es la razón por la que se demostró \lean{mcs_imp_mem_iff}. Las hipótesis de inducción conectan cada extremo con el suyo y ese lema conecta la implicación de un lado con la del otro, de modo que ambas direcciones caben en dos líneas cada una.
+
+El caso de la caja es el núcleo. La dirección de derecha a izquierda es inmediata. Si \lean{□φ ∈ Γ}, la definición de \lean{R} pone \lean{φ} en todo mundo accesible y la hipótesis de inducción la hace verdadera allí. Esto explica por qué la relación canónica se define como se define. La dirección contraria es por contraposición: si \lean{□φ} fuese verdadera en \lean{Γ} sin pertenecerle, el lema de existencia daría un MCS accesible sin \lean{φ}, pero \lean{hsat} lo hace verdadero allí y la hipótesis de inducción convierte esa verdad en pertenencia. La expresión \lean{⟨Δ, hΔmcs⟩} empaqueta el conjunto que devuelve el lema de existencia junto con su maximalidad para convertirlo en un mundo.
 
 \subsection{Completitud y adecuación}\label{subsec:comp-fin}
 
-AAA
+Con el lema de verdad, la demostración del teorema \ref{teo:completitud-mat} es la del capítulo \ref{sec:logicamodal} traducida paso a paso:
+
+\begin{lstlisting}
+theorem completeness {φ : ModalFormula VP} (h : Valid φ) : Provable φ := by
+  by_contra hnφ
+  -- (1) φ no se deduce sin hipótesis...
+  have hnd : ¬ DeducibleFrom (∅ : Set (ModalFormula VP)) φ := by
+    intro hd
+    exact hnφ (provable_of_deducibleFrom_empty hd)
+  -- (2) ...luego {∼φ} es consistente...
+  have hcons : Consistent (insert (∼φ) (∅ : Set (ModalFormula VP))) :=
+    consistent_insert_neg hnd
+  -- (3) ...y Lindenbaum lo extiende a un MCS Γ con ∼φ ∈ Γ
+  obtain ⟨Γ, hsub, hΓ⟩ := lindenbaum hcons
+  have hnφΓ : ∼φ ∈ Γ := hsub (Set.mem_insert _ _)
+  -- (4) Γ es un mundo canónico; como φ es válida, se satisface en él
+  have hsat : Satisfies (canonicalModel VP) ⟨Γ, hΓ⟩ φ :=
+    h (canonicalModel VP) ⟨Γ, hΓ⟩
+  -- (5) El lema de verdad convierte esa satisfacción en φ ∈ Γ
+  have hφΓ : φ ∈ Γ := (truth_lemma φ ⟨Γ, hΓ⟩).mp hsat
+  -- (6) Pero φ y ∼φ juntas producen Γ ⊢ ⊥, contra la consistencia de Γ
+  exact hΓ.1 (DeducibleFrom.mp (DeducibleFrom.mem hnφΓ) (DeducibleFrom.mem hφΓ))
+\end{lstlisting}
+
+Los seis pasos comentados se corresponden con los tres párrafos de la demostración del teorema \ref{teo:completitud-mat}. Nos detenemos en el paso (4). La hipótesis \lean{h : Valid φ} es, desplegada, una función que a cada modelo y cada mundo asigna una demostración de que $\varphi$ se satisface allí, y aplicarla al modelo canónico y al mundo \lean{⟨Γ, hΓ⟩} es todo lo que hay que hacer para usar la validez. Es la única vez en toda la demostración en que interviene la hipótesis del teorema. Toda la construcción anterior existe para poder escribir esa línea.
+
+Finalmente, los dos teoremas, corrección y completitud, se reúnen en una línea:
+
+\begin{leansnippet}
+theorem provable_iff_valid (φ : ModalFormula VP) : Provable φ ↔ Valid φ :=
+  ⟨soundness, completeness⟩
+\end{leansnippet}
+
+Si leemos el enunciado con calma vemos que, a la izquierda tenemos un tipo inductivo cuyos términos son árboles de derivación construidos con cuatro reglas; a la derecha, una cuantificación sobre todos los modelos de Kripke, todos los mundos y todas las valoraciones. Son dos objetos sin ningún parecido, y el teorema afirma que tienen exactamente los mismos elementos. Que Lean lo haya verificado significa que entre las dos definiciones no quedan pasos sin justificar, ni analogías, ni casos omitido por simetría.
+
+Queda una observación sobre lo que el teorema \emph{no} dice: la formalización establece la versión débil de la completitud, con $\Sigma = \emptyset$. La versión fuerte requiere el mismo modelo canónico y los mismos lemas, y solo falta definir la consecuencia semántica y comprobar que el mundo construido por Lindenbaum satisface todas las premisas. La infraestructura está construida, y en el capítulo \ref{sec:conclusiones} se recoge entre las continuaciones naturales del trabajo.

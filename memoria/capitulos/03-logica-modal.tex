@@ -245,7 +245,7 @@ Son los enunciados que formalizaremos (\lean{soundness} y \lean{completeness} en
 
 \subsection*{Corrección}
 
-De la corrección, que es la dirección sencilla, damos aquí un esbozo. Antes, incluimos un lema puente\footnote{Este lema puente es \lean{cpl_eval_iff_satisfies} en la formalización, y corresponde al ejercicio 1.3.4 de \cite{blackburn}. Es un buen ejemplo de lo que este trabajo quiere mostrar: el paso que en papel apenas merece un ejercicio concentra en Lean buena parte del esfuerzo de la corrección.}, necesario:
+De la corrección, que es la dirección sencilla, damos aquí un esbozo. Antes, incluimos un lema puente\footnote{Este lema puente es \lean{cplEval_iff_satisfies} en la formalización, y corresponde al ejercicio 1.3.4 de \cite{blackburn}. Es un buen ejemplo de lo que este trabajo quiere mostrar: el paso que en papel apenas merece un ejercicio concentra en Lean buena parte del esfuerzo de la corrección.}, necesario:
 
 \begin{lema}[Lema puente]\label{lem:puente}
 Sean $M$ un modelo y $w$ un mundo de $M$, y sea $v = (v_a, v_\nec)$ la valoración booleana dada por $v_a(p) = 1$ si y solo si $p \in V(w)$, y $v_\nec(\psi) = 1$ si y solo si $M, w \vDash \nec\psi$. Entonces, para toda fórmula $\varphi$,

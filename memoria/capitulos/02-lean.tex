@@ -201,7 +201,7 @@ Táctica & Lectura matemática & Uso destacado \\
 \lean{rintro}, \lean{rcases}, \lean{obtain} & descomponer hipótesis & Lindenbaum (§\ref{subsec:comp-lind}) \\
 \lean{refine}      & esquema con huecos & lema de existencia (§\ref{subsec:comp-ver}) \\
 \lean{by_contra}   & reducción al absurdo & varios, completitud (§\ref{subsec:comp-fin}) \\
-\lean{by_cases}    & distinción de casos clásica & propiedades de los MCS (§\ref{subsec:comp-mod}) \\
+\lean{by_cases}    & distinción de casos clásica & propiedades de los MCS (§\ref{subsec:comp-cons}) \\
 \lean{contradiction} & hipótesis contradictorias & tautologías del $\leftrightarrow$ (§\ref{sec:form-tautologias}) \\
 \lean{induction ... with} & inducción (estructural o sobre derivaciones) & corrección (§\ref{sec:form-correccion}), lema de verdad (§\ref{subsec:comp-ver}) \\
 \lean{subst}       & sustituir usando una igualdad & teorema de deducción (§\ref{subsec:comp-ded}) \\
@@ -265,7 +265,7 @@ rfl
 -- Goals accomplished!
 \end{lstlisting}
 
-Que un lema se demuestre con \lean{rfl} aporta además información importante: significa que no hay contenido matemático nuevo, solo se despliegan definiciones. Lo veremos en \lean{satisfies_neg} y en varios casos de la inducción de \lean{cpl_eval_iff_satisfies}, en la sección \ref{sec:form-semantica}.
+Que un lema se demuestre con \lean{rfl} aporta además información importante: significa que no hay contenido matemático nuevo, solo se despliegan definiciones. Lo veremos en \lean{satisfies_neg} y en varios casos de la inducción de \lean{cplEval_iff_satisfies}, en la sección \ref{sec:form-semantica}.
 
 \subsection{Construir y descomponer estructuras lógicas}
 
