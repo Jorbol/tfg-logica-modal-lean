@@ -3,16 +3,40 @@
 % =====================================================================
 \chapter{Conclusiones}\label{sec:conclusiones}
 
-AAA
+El objetivo general de este trabajo era formalizar en Lean~4 la lógica modal $\K$ y demostrar en ese entorno su corrección y completitud respecto de los modelos de Kripke. Se desarrollan en este capítulo las conclusiones de realizar dicho proceso.
 
 \section{Aprendizaje de Lean, lógica modal y formalización.}\label{sec:aprendizaje}
 
-AAA
+La circunstancia que más ha condicionado el trabajo es que partía de cero en las dos partes que componían la propuesta. No conocía Lean ni había estudiado lógica modal, de modo que había que formalizar un contenido desconocido con una herramienta desconocida. Sin embargo, a pesar de que ha sido un proceso complicado, también ha existido cierta sinergia en el aprendizaje. Una demostración escrita por quien está aprendiendo un tema no avisa de las hipótesis que faltan o la totalidad de lo que se debe probar, y quien la escribe carece precisamente del criterio necesario para detectarlos. Con Lean, el InfoView dice en todo momento y sin ambigüedad qué se tiene y qué falta, y no deja avanzar mientras falte algo. A su vez, tener que adaptar y escribir las demostraciones de los teoremas obligaba a adquirir un buen nivel de comprensión.
+
+De Lean, lo más costoso no fueron las tácticas, que se aprenden con los materiales de la comunidad \cite{nng, tpil, mil} y con la práctica, sino adaptarse a la teoría de tipos y al grado de formalidad y rigidez que requiere un asistente de demostración. De la lógica modal, lo más reseñable ha sido estudiarla primero leyendo \cite{blackburn} y teniendo que adaptar dicho conocimiento a los requisitos del código. Dicha adaptación ha producido buena parte de las observaciones del capítulo \ref{sec:logicamodal}: que el axioma (Dual) sobra en cuanto se toma $\nec$ como primitivo, que la necesitación debe quedar fuera de la deducción desde hipótesis (observación \ref{obs:sin-necesitacion}), o que la opacidad de la caja en el lema puente \ref{lem:puente} es una hipótesis de inducción que no se usa. También algunos cambios en la forma de definir los términos, como el caso de las tautologías en \ref{def:tautologia}.
+
+Otro aprendizaje relevante es que el esfuerzo de formalizar no es proporcional a la profundidad matemática. El lema puente \ref{lem:puente} es un ejercicio en \cite{blackburn} y concentra casi todo el trabajo de la corrección, mientras que el teorema de corrección, que es el resultado con nombre, ocupa cuatro líneas.
+
+Lo que ha quedado patente es que los asistentes de demostración son una forma distinta y poco habitual para mí de hacer matemáticas.
 
 \section{Reflexiones sobre Lean y la mecanización de las demostraciones}\label{reflexiones}
 
-AAA
+La introducción presentaba un ideal atractivo y reconocidamente ingenuo, el de un ``árbol de las matemáticas'' verificado, con una dirección descendente, la del grafo de dependencias de cada resultado, y otra ascendente, la de la ayuda mecánica para atacar problemas abiertos. Se señalaba ya entonces que este idealismo tenía cierta base pero enfrentaba problemas reales también.
+
+Para emprezar, Lean verifica que las demostraciones se siguen de las definiciones, no que las definiciones digan lo que queríamos decir. Si una cláusula de \lean{Satisfies} estuviera mal escrita, el fichero compilaría igual y el teorema final seguiría siendo cierto, solo que sobre otra lógica. Contra eso no hay verificación posible, y por eso lemas como \lean{satisfies_neg} o \lean{k_consistent} funcionan como control sobre el significado de lo definido. Admitir marcos con el tipo de mundos vacío (observación \ref{obs:vacio}) es todavía más ilustrativo: una decisión que no cabe verificar, solo argumentar.
+
+El segundo límite es económico. Lo que en \cite{blackburn} ocupa unas pocas páginas y un par de ejercicios ha necesitado aquí setecientas líneas, y buena parte de ellas no contiene matemáticas sino administración: subtipos que empaquetar y desempaquetar, argumentos implícitos, nombres de lemas auxiliares, etc. Las enormes diferencias entre página de manuales y líneas de código siguen siendo el obstáculo principal, y explica por qué las bibliotecas formalizadas cubren lo que cubren y no más.
+
+De las dos direcciones del ideal, la descendente es la que hoy está al alcance: el grafo de dependencias existe y se puede consultar. Conviene precisar, sin embargo, qué ese grafo es un registro histórico y no una descripción ontológica. Es decir, recoge el camino que efectivamente se recorrió, no lo que el teorema necesita. Lean certifica que nuestra demostración se sigue de esas premisas, pero no dice que hagan falta, ni que sean las mínimas, ni que no existan rutas más cortas. Son un ejemplo las ocho tautologías de la tabla \ref{tab:tautologias}, que son las que este desarrollo necesitó y no una base mínima. Establecer que una premisa es imprescindible exige un resultado de independencia, esto es, un teorema nuevo y por lo general más difícil, y no un subproducto de la verificación.
+
+La dirección ascendente es, de momento, una idea sin resultados. Las aplicaciones más prometedoras en el futuro cercano vendrán del hecho de que comprobar una demostración candidata sea muy barato, con independencia de su procedencia. Esto aplica especialmente a herramientas de inteligencia artificial, que destacan por su falta de fiabilidad. La razón sensata para el optimismo no es que las máquinas vayan a encontrar las demostraciones, sino que verificarlas no sea caro.
 
 \section{Mejoras y ampliaciones posibles}\label{mejoras}
 
-AAA
+El desarrollo deja abiertas varias continuaciones posibles:
+
+\begin{itemize}
+  \item \textbf{Completitud fuerte.} Definir la consecuencia semántica $\Sigma \vDash \varphi$ y comprobar que el mundo que devuelve Lindenbaum satisface las premisas de $\Sigma$. El modelo canónico y los lemas se reutilizan sin cambios.
+
+  \item \textbf{Lógicas modales más fuertes.} Añadiendo axiomas a $\K$ se obtienen $\mathbf{T}$, $\mathbf{S4}$, $\mathbf{S5}$, y con ellos la correspondencia entre cada axioma y una propiedad del marco, donde encajaría \lean{ValidInFrame}.
+
+  \item \textbf{Niños embarrados en Lean.} Desarrollar por completo el código en Lean para probar la solución del problema del capítulo \ref{sec:muddy}
+
+  \item \textbf{Multimodalidad y lógica epistémica.} Indexar la caja por agentes, $\nec_i$, y añadir conocimiento distribuido y común para poder desarrollar más en detalle lógica epistémica.
+\end{itemize}
