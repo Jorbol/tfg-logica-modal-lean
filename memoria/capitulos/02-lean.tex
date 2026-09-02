@@ -122,7 +122,7 @@ theorem rev_rev {α : Type} (l : List α) : (l.reverse).reverse = l :=
   List.reverse_reverse l
 \end{lstlisting}
 
-tiene el tipo \lean{α} implícito, de modo que basta escribir \lean{rev_rev [1, 2, 3]} y Lean deduce que \lean{α} es \lean{Nat} sin más que mirar la lista. Si \lean{α} se hubiera declarado explícito, \lean{(α : Type)}, habría que escribir \lean{rev_rev Nat [1, 2, 3]}, repitiendo una información que ya está contenida en el segundo argumento. Cuando interesa dar un argumento implícito a mano, se antepone \lean{@} al nombre del resultado, lo que vuelve explícitos todos sus argumentos: \lean{@rev_rev Nat [1, 2, 3]}.
+\noindent tiene el tipo \lean{α} implícito, de modo que basta escribir \lean{rev_rev [1, 2, 3]} y Lean deduce que \lean{α} es \lean{Nat} sin más que mirar la lista. Si \lean{α} se hubiera declarado explícito, \lean{(α : Type)}, habría que escribir \lean{rev_rev Nat [1, 2, 3]}, repitiendo una información que ya está contenida en el segundo argumento. Cuando interesa dar un argumento implícito a mano, se antepone \lean{@} al nombre del resultado, lo que vuelve explícitos todos sus argumentos: \lean{@rev_rev Nat [1, 2, 3]}.
 
 En el código se ha seguido la convención habitual en Lean: marcar como implícito todo argumento que pueda deducirse del tipo de los demás, y dejar explícitos los que no. En el capítulo \ref{sec:formalizacion}, el tipo de variables proposicionales sobre el que se construye todo el desarrollo será un argumento implícito de casi todas las definiciones y teoremas. Allí reaparecerá también la notación \lean{@}, en patrones como \lean{| @mp χ ξ _ _ ihχξ ihχ =>}, que nombran los argumentos implícitos de un constructor al razonar por inducción sobre las derivaciones.
 
@@ -149,7 +149,7 @@ local infixr:60 " ⟶ " => ModalFormula.imp
 local prefix:70 "□"     => ModalFormula.box
 \end{lstlisting}
 
-declara que \lean{φ ⟶ ψ} abrevia \lean{ModalFormula.imp φ ψ} y que \lean{□φ} abrevia \lean{ModalFormula.box φ}. El número tras los dos puntos es la precedencia. A mayor número, más fuerte liga. Así, $\nec\varphi \longrightarrow \psi$ se lee $(\nec\varphi) \longrightarrow \psi$. La \lean{r} de \lean{infixr} indica asociatividad a la derecha (la convención habitual para la implicación) y el modificador \lean{local} restringe la notación al fichero actual. Como se discute en la sección \ref{sec:form-sintaxis}, elegimos deliberadamente símbolos distintos de los de Lean ($\longrightarrow$ frente a $\to$, $\sim$ frente a $\lnot$, $\curlywedge$ frente a $\land$\dots) para que siempre sea visible si una expresión es una fórmula modal o una proposición de Lean.
+\noindent declara que \lean{φ ⟶ ψ} abrevia \lean{ModalFormula.imp φ ψ} y que \lean{□φ} se abrevia como \lean{ModalFormula.box φ}. El número tras los dos puntos es la precedencia. A mayor número, más fuerte liga. Así, $\nec\varphi \longrightarrow \psi$ se lee $(\nec\varphi) \longrightarrow \psi$. La \lean{r} de \lean{infixr} indica asociatividad a la derecha (la convención habitual para la implicación) y el modificador \lean{local} restringe la notación al fichero actual. Como se discute en la sección \ref{sec:form-sintaxis}, elegimos deliberadamente símbolos distintos de los de Lean ($\longrightarrow$ frente a $\to$, $\sim$ frente a $\lnot$, $\curlywedge$ frente a $\land$\dots) para que siempre sea visible si una expresión es una fórmula modal o una proposición de Lean.
 
 \section{El modo táctico y el InfoView}\label{sec:modo-tactico}
 
@@ -203,7 +203,7 @@ Táctica & Lectura matemática & Uso destacado \\
 \lean{by_contra}   & reducción al absurdo & varios, completitud (§\ref{subsec:comp-fin}) \\
 \lean{by_cases}    & distinción de casos clásica & propiedades de los MCS (§\ref{subsec:comp-cons}) \\
 \lean{contradiction} & hipótesis contradictorias & tautologías del $\leftrightarrow$ (§\ref{sec:form-tautologias}) \\
-\lean{induction ... with} & inducción (estructural o sobre derivaciones) & corrección (§\ref{sec:form-correccion}), lema de verdad (§\ref{subsec:comp-ver}) \\
+\lean{induction ... with} & inducción & corrección (§\ref{sec:form-correccion}) \\
 \lean{subst}       & sustituir usando una igualdad & teorema de deducción (§\ref{subsec:comp-ded}) \\
 \lean{simp}        & simplificación automática & un único uso (§\ref{subsec:comp-ded}) \\
 \bottomrule
@@ -245,7 +245,7 @@ apply h
 
 Es la contrapartida de \lean{exact}: en lugar de dar el término completo de una vez, se avanza dejando pendiente lo que falta. La usamos, entre otros sitios, en el caso de la implicación del lema de verdad (sección \ref{sec:form-completitud}).
 
-\tactica{\lean{have}} Introduce una afirmación intermedia con su propia demostración: \lean{have h : p := término} o bien \lean{have h : p := by ...} Tras ella, \lean{h} queda disponible en el contexto como cualquier otra hipótesis.
+\tactica{\lean{have}} Introduce una afirmación intermedia junto con su propia demostración para poder usar como hipótesis: \lean{have h : p := término} o bien \lean{have h : p := by ...} Tras ella, \lean{h} queda disponible en el contexto como cualquier otra hipótesis.
 
 \begin{lstlisting}
 -- h : p → q,  hp : p

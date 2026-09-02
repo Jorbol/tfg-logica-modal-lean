@@ -11,10 +11,10 @@ La gramática de la definición \ref{def:lenguaje} se traduce en un tipo inducti
 
 \begin{lstlisting}
 inductive ModalFormula (VP : Type) where
-  | atom : VP → ModalFormula VP                                 -- variable
-  | bot  : ModalFormula VP                                      -- ⊥
+  | atom : VP → ModalFormula VP                                  -- variable
+  | bot  : ModalFormula VP                                        -- ⊥
   | imp  : ModalFormula VP → ModalFormula VP → ModalFormula VP  -- implicación
-  | box  : ModalFormula VP → ModalFormula VP                    -- □
+  | box  : ModalFormula VP → ModalFormula VP                     -- □
 
 def ModalFormula.neg (φ : ModalFormula VP) : ModalFormula VP :=
   φ ⟶ ModalFormula.bot

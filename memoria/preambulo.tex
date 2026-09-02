@@ -161,7 +161,9 @@
 \DeclareUnicodeCharacter{2099}{\ensuremath{{}_n}}
 
 % Código Lean en línea: \lean{...}
-\newcommand{\lean}[1]{\texttt{\small #1}}
+\newcommand{\lean}[1]{\mbox{\texttt{\small #1}}}
+\usepackage{microtype}
+\setlength{\emergencystretch}{3em}
 
 % ----------------------- Hipervínculos -------------------------------
 \usepackage[colorlinks=true, linkcolor=black, citecolor=black,
