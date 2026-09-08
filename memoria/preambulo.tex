@@ -31,7 +31,7 @@
 % ----------------------- Código Lean (listings) ----------------------
 \usepackage{listings}
 
-\usepackage[strings]{underscore}
+\usepackage[strings,nohyphen]{underscore}
 
 \definecolor{leankw}{RGB}{0,90,180}
 \definecolor{leantactic}{RGB}{130,30,120}
@@ -161,10 +161,9 @@
 \DeclareUnicodeCharacter{2099}{\ensuremath{{}_n}}
 
 % Código Lean en línea: \lean{...}
-\newcommand{\lean}[1]{\mbox{\texttt{\small #1}}}
-\usepackage{microtype}
+\newcommand{\lean}[1]{\mbox{\texttt{\small #1}}}\usepackage{microtype}
 \setlength{\emergencystretch}{3em}
-
+\tolerance=1500
 % ----------------------- Hipervínculos -------------------------------
 \usepackage[colorlinks=true, linkcolor=black, citecolor=black,
             urlcolor=blue!60!black,

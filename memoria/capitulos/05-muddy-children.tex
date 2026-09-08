@@ -4,14 +4,12 @@
 \chapter{Hacia la lógica epistémica: el problema de los niños embarrados}
 \label{sec:muddy}
 
-La idea de este capítulo es aterrizar la formalización abstracta de la lógica modal en un ejemplo. Usaremos un acertijo clásico de razonamiento sobre el conocimiento, el llamado problema de los \emph{niños embarrados} (\emph{muddy children}). Presentaremos el problema y algunas de las preguntas que
-plantea y haremos una modelización coherente con el desarrollo de los capítulos anteriores con la que demostrar la solución. AAA Lean?
-
-AAA USO DE IA EN 3 SITIOS CONCRETOS IMPORTANTES: GUÍA PARA MODELIZAR (\ref{sec:epistemica}) SIN MODELO MULTIAGENTE COMO EN LA LITERATURA, OBSERVACIÓN \ref{obs:anuncio}, MODELIZACIÓN DE LA PROPOSICIÓN \ref{prop:rondas} DESDE \cite{fhmv}
+La idea de este capítulo es aplicar la formalización abstracta de la lógica modal a un ejemplo. Usaremos un acertijo clásico de razonamiento sobre el conocimiento, el llamado problema de los \emph{niños embarrados} (\emph{muddy children}). Presentaremos el problema y algunas de las preguntas que
+plantea y haremos una modelización coherente con el desarrollo de los capítulos anteriores con la que demostrar la solución.
 
 \section{El acertijo}\label{sec:acertijo}
 
-Un enunciado posible del problema es el siguiente:
+Un enunciado posible del problema, adaptado del de Fagin, Halpern, Moses y Vardi \cite[§1.1]{fhmv}, es el siguiente:
 
 \vspace{3mm}
 
@@ -40,7 +38,7 @@ Si suponemos que
     \item y, todo lo anterior, junto con el enunciado del problema, es \emph{conocimiento común} entre los niños: todos lo saben, todos saben que todos lo saben, todos saben que todos saben que todos lo saben, y así sucesivamente,
 \end{itemize}
 
-entonces, la respuesta al acertijo es que sí pueden llegar a una conclusión sobre su frente y, en concreto:
+\noindent entonces, la respuesta al acertijo es que sí pueden llegar a una conclusión sobre su frente y, en concreto:
 
 \begin{quote}
   \textbf{En las primeras $k-1$ rondas ningún niño dirá nada. En la ronda $k$, los $k$ niños manchados dirán que sí, y los limpios seguirán en silencio.}
@@ -50,15 +48,15 @@ El último de los supuestos merece atención, y volveremos sobre él en la secci
 
 \begin{itemize}
     \item Si $k=1$, el único niño manchado ve todo el resto de frentes limpias. Como el adulto ha dicho que hay al menos una manchada y no es ninguna de las que ve, tiene que ser la suya, y contesta que sí en la primera ronda.
-    \item Si $k=2$, cada uno de los dos niños manchados ve una sola frente sucia y ninguno sabe nada de la suya, así que en la primera ronda nadie dice nada. Pero entonces uno razona: ``si yo estuviera limpio, el otro manchado no habría visto ninguna frente manchada y habría contestado que sí. Como ha callado, yo estoy manchado''. El otro niño manchado razona de la misma forma y ambos contestan que sí en la segunda ronda.
+    \item Si $k=2$, cada uno de los dos niños manchados ve una sola frente sucia y ninguno sabe nada de la suya, así que en la primera ronda nadie dice nada. Pero entonces cada uno razona: ``si yo estuviera limpio, el otro manchado no habría visto ninguna frente manchada y habría contestado que sí. Como ha callado, yo estoy manchado'' y ambos contestan que sí en la segunda ronda.
     \item Con $k=3$ el argumento se repite un nivel más arriba: cada niño manchado ve dos frentes sucias, espera que esos dos contesten que sí en la segunda ronda y, al ver que callan, deduce que él también está manchado.
 \end{itemize}
 
 Esta idea será la que formalizaremos en el resto del capítulo.
 
-Además del razonamiento hacia la solución, el problema deja una paradoja aparente para cualquier caso con $k \ge 2$. En cualquier supuesto así, cada niño ve al menos una frente con barro, de modo que antes de que el adulto informase sobre la existencia de alguna frente manchada, todos los niños ya lo sabían. El anuncio del adulto no parece informar a nadie de nada. Sin embargo, el anuncio es necesario. Sin él, en la situación con $k=2$ el razonamiento del primer niño no se iniciaría, porque no hay ninguna razón para que el segundo hubiera dicho nada en la primera ronda aunque él estuviera limpio. La respuesta a esta paradoja está en el último de los supuestos que hemos escrito, y profundizaremos en ella en la sección \ref{sec:comun}, cuando tengamos el modelo construido. Veremos que existen diferencias entre conocimiento mutuo y conocimiento común.
+Además del razonamiento hacia la solución, el problema deja una paradoja aparente para cualquier caso con $k \ge 2$. En cualquier supuesto así, cada niño ve al menos una frente con barro, de modo que antes de que el adulto informase sobre la existencia de alguna frente manchada, todos los niños ya lo sabían. El anuncio del adulto no parece informar a nadie de nada. Sin embargo, el anuncio es necesario. Sin él, en la situación con $k=2$ el razonamiento del primer niño no se iniciaría, porque no hay ninguna razón para que el segundo hubiera dicho nada en la primera ronda aunque el primero estuviera limpio. La respuesta a esta paradoja está en el último de los supuestos que hemos escrito, y profundizaremos en ella en la sección \ref{sec:comun}, cuando tengamos el modelo construido. Veremos que existen diferencias entre conocimiento mutuo y conocimiento común.
 
-El acertijo circula en muchas versiones (damas con la cara tiznada, sombreros de colores, sabios y sellos, esposas infieles). Una de las más antiguas del siglo XX es la de Littlewood \cite[pp.~3--4]{littlewood}, planteada con tres damas que viajan en un vagón de tren y que además la generaliza a $n$ damas y resuelve el caso general por inducción. El tratamiento estándar, con la terminología de los niños embarrados, es el del capítulo 1 de \cite{fhmv}. La lectura dinámica que seguimos aquí, en la que cada anuncio transforma el modelo, es la de \cite{ditmarsch}.
+El acertijo circula en muchas versiones (damas con la cara tiznada, sombreros de colores, sabios y sellos, esposas infieles). Una de las más antiguas del siglo XX es la de Littlewood \cite[pp.~3--4]{littlewood}, planteada con tres damas que viajan en un vagón de tren y que además generaliza a $n$ damas y resuelve el caso general por inducción. El tratamiento estándar, con la terminología de los niños embarrados, es el del capítulo 1 de \cite{fhmv}. La lectura dinámica que seguimos aquí, en la que cada anuncio transforma el modelo, es la de \cite{ditmarsch}.
 
 \section{El conocimiento como modalidad}\label{sec:epistemica}
 
@@ -70,13 +68,13 @@ Fijemos entonces un agente. Sus mundos posibles son las descripciones completas 
 \]
 dice que $\varphi$ es verdadera en todos los estados que el agente considera posibles, es decir, que $\varphi$ se sigue de lo que observa. Esto es lo que llamamos \emph{saber} $\varphi$. La fórmula dual, $\pos\varphi$, dice que hay un estado compatible con sus observaciones en el que $\varphi$ es cierta. Esto es que el agente \emph{considera posible} $\varphi$. En la lectura epistémica es habitual escribir $K\varphi$ y $\widehat{K}\varphi$ (de \emph{knowledge}) en lugar de $\nec\varphi$ y $\pos\varphi$, pero se trata de los mismos operadores.
 
-Cuando hay varios agentes, cada uno tiene su propia relación de indistinguibilidad sobre los mismos mundos. El tratamiento estándar las reúne en un solo modelo multiagente, con una relación $\sim_i$ y un operador $K_i$ por agente, sobre un lenguaje con tantas cajas como agentes \cite[cap.~2]{fhmv}. Nosotros no podemos hacer exactamente eso, porque tanto el lenguaje del capítulo \ref{sec:logicamodal} como su formalización del capítulo \ref{sec:formalizacion} tienen una sola caja. Pero obsérvese qué es realmente un modelo multiagente: \emph{una familia de modelos de Kripke con los mismos mundos y la misma valoración, uno por agente}. Y una fórmula del fragmento monoagente, esto es, una en la que aparece el operador de un único agente, se evalúa enteramente dentro del modelo de ese agente. Por eso, en todo este capítulo, en lugar de definir un lenguaje nuevo escribiremos
+Cuando hay varios agentes, cada uno tiene su propia relación de indistinguibilidad sobre los mismos mundos. El tratamiento estándar las reúne en un solo modelo multiagente, con una relación $\sim_i$ y un operador $K_i$ por agente, sobre un lenguaje con tantas cajas como agentes \cite[cap.~2]{fhmv}. Nosotros no podemos hacer exactamente eso, porque tanto el lenguaje del capítulo \ref{sec:logicamodal} como su formalización del capítulo \ref{sec:formalizacion} tienen una sola caja. Pero obsérvese qué es realmente un modelo multiagente: un modelo para un tipo de semejanza con $n$ diamantes es una tupla $(W, \sim_1, \dots, \sim_n, V)$ \cite[Def.~1.23]{blackburn}, esto es, \emph{una familia de modelos de Kripke con los mismos mundos y la misma valoración, uno por agente}.. Y una fórmula del fragmento monoagente, esto es, una en la que aparece el operador de un único agente, se evalúa enteramente dentro del modelo de ese agente. Por eso, en todo este capítulo, en lugar de definir un lenguaje nuevo escribiremos
 \[
   M^{(i)}, S \vDash \nec\varphi
 \]
 para decir que el niño $i$ sabe $\varphi$, donde $M^{(i)}$ es el modelo de Kripke cuya relación de accesibilidad es la indistinguibilidad de $i$. El lenguaje, los modelos y la satisfacción son los de los capítulos \ref{sec:logicamodal} y \ref{sec:formalizacion}, sin ningún cambio.
 
-El problema que trae esta decisión es que no se pueden escribir fórmulas que mezclen el conocimiento de dos niños, como $K_1K_2\varphi$. Para el teorema \ref{teo:muddy} no hace falta, pues en él solo aparecen $\nec m_i$ y $\nec\lnot m_i$ para un niño cada vez. Sí hará falta, en cambio, para el anuncio de la sección \ref{sec:anuncios} y para la discusión del conocimiento común de la sección \ref{sec:comun}. En ambos casos lo señalaremos explícitamente y explicaremos cómo se suple.
+El problema que trae esta decisión es que no se pueden escribir fórmulas que mezclen el conocimiento de dos niños, como $K_1K_2\varphi$. Para el teorema \ref{teo:muddy} no hace falta. Sí será necesario, en cambio, para el anuncio de la sección \ref{sec:anuncios} y para la discusión del conocimiento común de la sección \ref{sec:comun}. En ambos casos lo señalaremos explícitamente y explicaremos cómo se suple.
 
 \section{El modelo del acertijo}\label{sec:modelo-ninos}
 
@@ -126,7 +124,7 @@ El nombre de \emph{cubo} viene de la forma del modelo. Si identificamos cada sub
 \label{fig:cubo}
 \end{figure}
 
-El lema siguiente dice que las clases de indistinguibilidad son muy pequeñas. Cada niño duda entre dos mundos y solo dos. Escribimos $S \simdif \{i\}$ (la diferencia simétrica de $S$ con el conjunto $\{i\}$) para el mundo que resulta de cambiar en $S$ el estado del niño $i$, esto es, $S \setminus \{i\}$ cuando $i \in S$ y $S \cup \{i\}$ cuando $i \notin S$. Obsérvese que $S \simdif \{i\}$ es siempre distinto de $S$.
+El lema siguiente dice que las clases de indistinguibilidad son muy pequeñas. Es un lema necesario para nuestra definición particular de $\sim_i$ mediante $S \setminus \{i\} = T \setminus \{i\}$. Cada niño duda entre dos mundos y solo dos. Escribimos $S \simdif \{i\}$ (la diferencia simétrica de $S$ con el conjunto $\{i\}$) para el mundo que resulta de cambiar en $S$ el estado del niño $i$, esto es, $S \setminus \{i\}$ cuando $i \in S$ y $S \cup \{i\}$ cuando $i \notin S$. Obsérvese que $S \simdif \{i\}$ es siempre distinto de $S$.
 
 \begin{lema}[Vecinos]\label{lema:vecinos}
 $S \sim_i T$ si y solo si $T = S$ o $T = S \simdif \{i\}$.
@@ -136,7 +134,7 @@ $S \sim_i T$ si y solo si $T = S$ o $T = S \simdif \{i\}$.
 Si $T = S$ o $T = S \simdif \{i\}$, entonces $S$ y $T$ tienen los mismos elementos distintos de $i$, luego $S \sim_i T$. Recíprocamente, sea $S \sim_i T$. Si $i$ pertenece a los dos conjuntos o a ninguno, entonces $S$ y $T$ coinciden también en $i$, y $T = S$. Si pertenece exactamente a uno, digamos $i \in S$ e $i \notin T$, entonces $T = T \setminus \{i\} = S \setminus \{i\} = S \simdif \{i\}$, y análogamente en el otro caso.
 \end{proof}
 
-\begin{observacion}[Por qué esto es una lógica del conocimiento]\label{obs:s5}
+\begin{observacion}\label{obs:s5}
 La relación $\sim_i$ es de equivalencia, pues es el núcleo de la aplicación $S \mapsto S \setminus \{i\}$; por el lema \ref{lema:vecinos}, además, sus clases son exactamente los pares $\{S, S \simdif\{i\}\}$. La sección \ref{sec:kripke-mat} señalaba que ciertas fórmulas son válidas exactamente en los marcos con cierta propiedad. Por ejemplo, $\nec p \limp p$ lo es en los reflexivos. Las tres propiedades que hacen de $\sim_i$ una equivalencia se corresponden, en ese mismo sentido, con tres esquemas:
 \[
   \begin{array}{lll}
@@ -148,13 +146,13 @@ La relación $\sim_i$ es de equivalencia, pues es el núcleo de la aplicación $
                       & \text{quien no sabe algo sabe que no lo sabe,}
   \end{array}
 \]
-donde \emph{euclídea} significa que de $w \sim v$ y $w \sim u$ se sigue $v \sim u$. Los dos últimos esquemas se conocen como \emph{introspección positiva} y \emph{negativa}, respectivamente. Las tres propiedades son en realidad redundantes: una relación reflexiva y euclídea es simétrica (de $w \sim v$ y $w \sim w$ se sigue $v \sim w$) y también transitiva (si $w \sim v$ y $v \sim u$, la simetría da $v \sim w$ y la propiedad euclídea aplicada en $v$ da $w \sim u$), luego es de equivalencia; por eso $\mathbf{S5}$ suele axiomatizarse solo con (T) y (5). El sistema $\K$ ampliado con estos esquemas es $\mathbf{S5}$, la lógica epistémica estándar \cite[cap.~3]{fhmv}. Las correspondencias entre esquemas y propiedades de los marcos que acabamos de invocar no se demuestran en este trabajo; son el objeto del capítulo 3 de \cite{blackburn}, como ya se indicó en la sección \ref{sec:kripke-mat}. Tampoco usaremos $\mathbf{S5}$ como sistema, porque en este capítulo no se demuestra nada en un cálculo axiomático y todo son comprobaciones semánticas dentro de un modelo concreto. (AAA SI MUDDY-LEAN, AÑADIR QUE SE VE T)
+donde \emph{euclídea} significa que de $w \sim v$ y $w \sim u$ se sigue $v \sim u$. Los dos últimos esquemas se conocen como \emph{introspección positiva} y \emph{negativa}, respectivamente \cite[cap.~3]{fhmv}. Las tres propiedades son en realidad redundantes: una relación reflexiva y euclídea es simétrica (de $w \sim v$ y $w \sim w$ se sigue $v \sim w$) y también transitiva (si $w \sim v$ y $v \sim u$, la simetría da $v \sim w$ y la propiedad euclídea aplicada en $v$ da $w \sim u$), luego es de equivalencia. $\mathbf{S5}$, el sistema $\K$ ampliado con estos esquemas, suele axiomatizarse solo con (T) y (5). Este sistema es la lógica epistémica estándar. Las correspondencias entre esquemas y propiedades de los marcos que acabamos de invocar no se demuestran en este trabajo; son el objeto del capítulo 3 de \cite{blackburn}, como ya se indicó en la sección \ref{sec:kripke-mat}. Tampoco usaremos $\mathbf{S5}$ como sistema, porque en este capítulo no se demuestra nada en un cálculo axiomático y todo son comprobaciones semánticas dentro de un modelo concreto.
 \end{observacion}
 
 Cerramos la sección con dos comprobaciones sencillas que sirven para convencerse de que el modelo dice lo que queremos.
 
 \begin{itemize}
-    \item Cada niño conoce el estado de los demás: si $i \ne j$, las fórmulas $m_j \limp \nec m_j$ y $\lnot m_j \limp \nec\lnot m_j$ son válidas en $M^{(i)}$. Para la primera, de $j \in S$ y $S \sim_i T$ se sigue $j \in S \setminus \{i\} = T \setminus \{i\} \subseteq T$, donde el primer paso usa que $j \ne i$, Para la segunda, de $j \notin S$ y $S \sim_i T$ se sigue $j \notin T$, pues $j \in T$ daría $j \in T\setminus\{i\} = S \setminus\{i\} \subseteq S$.
+    \item Cada niño conoce el estado de los demás: si $i \ne j$, las fórmulas $m_j \limp \nec m_j$ y $\lnot m_j \limp \nec\lnot m_j$ son válidas en $M^{(i)}$. Para la primera, de $j \in S$ y $S \sim_i T$ se sigue $j \in S \setminus \{i\} = T \setminus \{i\} \subseteq T$, donde el primer paso usa que $j \ne i$. Para la segunda, de $j \notin S$ y $S \sim_i T$ se sigue $j \notin T$, pues $j \in T$ daría $j \in T\setminus\{i\} = S \setminus\{i\} \subseteq S$.
     \item Ningún niño sabe nada sobre su propia frente: para todo mundo $S$ y todo $i$ se tiene $M^{(i)}, S \nvDash \nec m_i$ y $M^{(i)}, S \nvDash \nec\lnot m_i$, porque $S$ y $S \simdif\{i\}$ son dos mundos indistinguibles para $i$, uno con $m_i$ verdadera y otro con $m_i$ falsa. Dicho con el operador dual, $M^{(i)}, S \vDash \pos m_i \land \pos\lnot m_i$: el niño considera posibles las dos cosas.
 \end{itemize}
 
@@ -168,7 +166,7 @@ Sea $M = (W, R, V)$ un modelo de Kripke y sea $P \subseteq W$ no vacío. El mode
 
 La condición $P \ne \varnothing$ es la que exige la definición \ref{def:kripke}, y en el acertijo se cumplirá siempre.
 
-Si algo se anuncia en voz alta y es cierto, todos descartan a la vez los estados incompatibles con lo anunciado, y nadie gana ni pierde capacidad de observación, de modo que quien no distinguía dos mundos supervivientes los sigue sin distinguir. Esto no es un teorema, sino la decisión de modelización que define qué entendemos por anuncio público: cuando $P$ es el conjunto de mundos donde una fórmula $\varphi$ es verdadera, $M|_P$ es el modelo actualizado tras anunciar $\varphi$, y es el operador básico de la \emph{lógica de anuncios públicos} de Plaza \cite{plaza} (véase \cite{ditmarsch} para un tratamiento moderno). La restricción se aplica a la vez a los $n$ modelos, porque el anuncio lo oyen todos. Nótese que la definición \ref{def:restriccion} admite cualquier $P$ no vacío, sin exigir que sea el conjunto de verdad de una fórmula; esto será importante enseguida.
+Si algo se anuncia en voz alta y es cierto, todos descartan a la vez los estados incompatibles con lo anunciado, y nadie gana ni pierde capacidad de observación, de modo que quien no distinguía dos mundos supervivientes los sigue sin distinguir. Esto define qué entendemos por anuncio público: cuando $P$ es el conjunto de mundos donde una fórmula $\varphi$ es verdadera, $M|_P$ es el modelo actualizado tras anunciar $\varphi$, y es el operador básico de la \emph{lógica de anuncios públicos} de Plaza \cite{plaza} (véase \cite{ditmarsch} para un tratamiento moderno). La restricción se aplica a la vez a los $n$ modelos, porque el anuncio lo oyen todos. Nótese que la definición \ref{def:restriccion} admite cualquier $P$ no vacío, sin exigir que sea el conjunto de verdad de una fórmula; esto será importante enseguida.
 
 Veamos qué anuncios hay en el acertijo. El primero es el del adulto, ``al menos uno de vosotros está manchado'', que es verdadero exactamente en los mundos $S$ con $|S| \ge 1$. Es decir, que elimina un solo mundo, el $\varnothing$. Los siguientes anuncios son las respuestas. Como todos responden a la vez y en voz alta, que nadie diga nada equivale a un único anuncio público, ``ningún niño sabe si está manchado''; y ese anuncio elimina, por definición, los mundos en los que algún niño sí lo sabría. El trabajo consiste en identificar los modelos que van apareciendo.
 
@@ -182,11 +180,17 @@ pero cada una de sus partes ha de evaluarse en el modelo del niño correspondien
   P \;=\; \bigl\{\, S \in W \;:\; \text{para todo } i,\
   M^{(i)}, S \nvDash \nec m_i \ \text{y}\ M^{(i)}, S \nvDash \nec\lnot m_i \,\bigr\}
 \]
-es un subconjunto de $W$ perfectamente determinado, definido en el metalenguaje a partir de condiciones que sí son monoagentes. Lo que perdemos es la posibilidad de \emph{escribir} el anuncio como una fórmula del lenguaje objeto; en un modelo multiagente sería una fórmula más, y así es como lo presenta el tratamiento estándar \cite[cap.~1]{fhmv}.
+es un subconjunto de $W$ perfectamente determinado, definido en el metalenguaje a partir de condiciones que sí son monoagentes. El modelo multiagente y el anuncio escrito como fórmula son el tratamiento estándar \cite[cap.~1]{fhmv}, y la familia $(M^{(i)})_{i \in N}$ son esos mismos datos agrupados de otro modo (sección \ref{sec:epistemica}). Lo propio de este trabajo es solo la decisión de presentarlo de esta manera, que no viene impuesta por la matemática sino por el lenguaje de una sola caja que se formaliza en el capítulo \ref{sec:formalizacion}.
 \end{observacion}
 
 \begin{definicion}[Escenarios]\label{def:escenarios}
-Para $0 \le r \le n$, sea $W_r = \{ S \subseteq N : |S| \ge r \}$ y sea $M_r^{(i)} = M^{(i)}|_{W_r}$. En particular, $W_0 = \mathcal{P}(N)$ y $M_0^{(i)} = M^{(i)}$.
+Para $0 \le r \le n$, sea
+\[
+  W_r = \{\, S \subseteq N : |S| \ge r \,\},
+  \qquad
+  M_r^{(i)} = M^{(i)}|_{W_r} \quad (1 \le i \le n).
+\]
+Llamaremos \emph{escenario $r$} al sistema formado por los $n$ modelos $M_r^{(1)}, \dots, M_r^{(n)}$, que comparten todos el mismo conjunto de mundos $W_r$. Un \emph{mundo del escenario $r$} es, por tanto, un elemento de $W_r$, esto es, un $S \subseteq N$ con $|S| \ge r$. En particular, $W_0 = \mathcal{P}(N)$ y $M_0^{(i)} = M^{(i)}$, de modo que el escenario $0$ es el cubo entero.
 \end{definicion}
 
 La cota $r \le n$ garantiza que $W_r \ne \varnothing$, pues $N \in W_r$ siempre, como exige la definición \ref{def:restriccion}. Obsérvese además que el mundo real sobrevive a todas las restricciones que vamos a usar: si $k = |S^{*}|$, entonces $S^{*} \in W_r$ para todo $r \le k$. Esto es imprescindible, porque un anuncio público solo tiene sentido cuando lo anunciado es verdadero en el mundo real.
@@ -221,21 +225,30 @@ Así, $M_0^{(i)}$ es el cubo entero (todo mundo tiene al menos $0$ manchados) y 
 
 \section{El teorema}\label{sec:teorema-ninos}
 
-Fijemos primero la terminología. Diremos que el niño $i$ \emph{sabe si está manchado} en el mundo $S$ del escenario $r$ cuando
+Fijemos primero la terminología.
+
+\begin{definicion}[Saber si está manchado]\label{def:sabe}
+Sean $0 \le r \le n$, sea $S$ un mundo del escenario $r$ y sea $i \in N$. Diremos que el niño $i$ \emph{sabe si está manchado} en $S$, dentro del escenario $r$, cuando
 \[
   M_r^{(i)}, S \vDash \nec m_i \lor \nec\lnot m_i,
 \]
 esto es, cuando sabe que lo está o sabe que no lo está.
+\end{definicion}
 
-La proposición siguiente es el corazón del capítulo: describe exactamente quién sabe qué en cada escenario. Obsérvese que sus tres apartados agotan los casos posibles, pues un mundo $S$ del escenario $r$ cumple $|S| \ge r$ y el niño $i$ está o no está en $S$.
+La proposición siguiente describe exactamente quién sabe qué en cada escenario. Obsérvese que sus tres apartados agotan los casos posibles, pues un mundo $S$ del escenario $r$ cumple $|S| \ge r$ y el niño $i$ está o no está en $S$.
 
 \begin{proposicion}\label{prop:rondas}
-Sean $0 \le r \le n$ y $S$ un mundo del escenario $r$, es decir, $|S| \ge r$. Entonces:
+Sean $0 \le r \le n$ y $S$ un mundo del escenario $r$. Entonces, para cada
+niño $i$:
 \begin{enumerate}
   \item[(a)] si $i \in S$ y $|S| = r$, entonces $M_r^{(i)}, S \vDash \nec m_i$;
-  \item[(b)] si $i \in S$ y $|S| > r$, entonces $M_r^{(i)}, S \nvDash \nec m_i$ y $M_r^{(i)}, S \nvDash \nec\lnot m_i$;
-  \item[(c)] si $i \notin S$, entonces $M_r^{(i)}, S \nvDash \nec m_i$ y $M_r^{(i)}, S \nvDash \nec\lnot m_i$.
+    en particular, $i$ sabe si está manchado en $S$;
+  \item[(b)] si $i \in S$ y $|S| > r$, entonces
+    $M_r^{(i)}, S \nvDash \nec m_i \lor \nec\lnot m_i$;
+  \item[(c)] si $i \notin S$, entonces
+    $M_r^{(i)}, S \nvDash \nec m_i \lor \nec\lnot m_i$.
 \end{enumerate}
+En los casos (b) y (c), por tanto, el niño $i$ no sabe si está manchado en $S$.
 \end{proposicion}
 
 \begin{proof}
@@ -248,7 +261,7 @@ Por el lema \ref{lema:vecinos}, los únicos mundos indistinguibles de $S$ para e
 (c) El mundo $T = S \cup \{i\}$ cumple $|T| \ge |S| \ge r$, luego sigue en el escenario, e $i \in T$. De nuevo $S$ y $T$ discrepan sobre $m_i$ y ninguno de los dos ha sido eliminado, así que $i$ no sabe nada sobre su propia frente.
 \end{proof}
 
-El apartado (c) permite extraer una observación. Un niño limpio nunca averigua que lo está a partir de los anuncios de que nadie sabe nada, por muchas rondas de silencio que pasen. La razón es que el mundo alternativo que él considera posible tiene \emph{más} manchados que el real, y esos anuncios sucesivos no eliminan dichos mundos.\footnote{Cosa distinta es lo que ocurre \emph{después} de la ronda $k$. El niño limpio $i$ habrá oído entonces que los niños de $S^{*}$ sí saben, y ese anuncio elimina el mundo $S^{*}\cup\{i\}$: en él hay $k+1$ manchados y, por los apartados (b) y (c), nadie habría hablado. Al niño $i$ solo le quedaría el mundo $S^{*}$ y sabría que está limpio. Lo que demuestra el apartado (c) es, precisamente, que ningún anuncio de la forma ``nadie lo sabe'' le sirve de nada.}
+El apartado (c) permite extraer una observación. Un niño limpio nunca averigua que lo está a partir de los anuncios de que nadie sabe nada, por muchas rondas de silencio que pasen. La razón es que el mundo alternativo que él considera posible tiene un manchado \emph{más} que el real, y esos anuncios sucesivos no eliminan dichos mundos.\footnote{Cosa distinta es lo que ocurre \emph{después} de la ronda $k$. El niño limpio $i$ habrá oído entonces que los niños de $S^{*}$ sí saben, y ese anuncio elimina el mundo $S^{*}\cup\{i\}$: en él hay $k+1$ manchados y, por los apartados (b) y (c), nadie habría hablado. Al niño $i$ solo le quedaría el mundo $S^{*}$ y sabría que está limpio. Lo que demuestra el apartado (c) es, precisamente, que ningún anuncio de la forma ``nadie lo sabe'' le sirve de nada.}
 
 \begin{corolario}\label{cor:ronda}
 Sean $1 \le r \le n$ y $S$ un mundo del escenario $r$. Entonces algún niño sabe si está manchado en $S$ si y solo si $|S| = r$. En consecuencia, si $r < n$, los mundos del escenario $r$ que sobreviven al anuncio ``ningún niño sabe si está manchado'' son exactamente los del escenario $r+1$.
@@ -298,12 +311,10 @@ Que ese camino atraviese mundos que nadie se cree de verdad es irrelevante. La s
 
 Escribimos $E\varphi$ para ``todos saben $\varphi$'', $E^{2}\varphi$ para ``todos saben que todos saben $\varphi$'', y así sucesivamente: cada exponente es un peldaño más de una escalera de conocimiento anidado. A $E^{i}\varphi$ le llamamos \emph{conocimiento mutuo de nivel i}.
 
-Llamamos \emph{conocimiento común} de $\varphi$, y lo escribimos $C\varphi$, a disponer de la escalera entera, es decir, a que se cumplan todos los $E^{j}\varphi$ a la vez, \emph{ad infinitum}\footnote{Esto no es una definición formal para lógica epistémica puesto que los lenguajes habituales de la misma son finitos y la fórmula $C\varphi \iff \land_{i=0}^{\infty} E^{i}\varphi$ no es una fórmula bien formada.}. Por lo que acabamos de ver, antes del anuncio, el conocimiento común falla siempre, por muchos niños manchados que haya. La escalera es alta, pero nunca infinita.
+Llamamos \emph{conocimiento común} de $\varphi$, y lo escribimos $C\varphi$, a disponer de la escalera entera, es decir, a que se cumplan todos los $E^{j}\varphi$ a la vez, \emph{ad infinitum}\footnote{Esto no es una definición formal para lógica epistémica puesto que los lenguajes habituales de la misma son finitos y la fórmula $C\varphi \iff \land_{i=0}^{\infty} E^{i}\varphi$ no es una fórmula bien formada.}. Por lo que acabamos de ver, antes del anuncio, el conocimiento común falla siempre, por muchos niños manchados que haya.
 
 ¿Y qué hace entonces el anuncio público? Elimina el mundo $\varnothing$ del modelo. Y una vez fuera del modelo ya no hay ningún camino, de ninguna longitud, que lleve a un mundo donde $\varphi$ sea falsa, porque ese mundo ha dejado de existir. La escalera de conocimiento aparece entera directamente, no como una construcción de peldaños anidados.
 
-Terminamos con una advertencia. Todo este razonamiento mezcla el conocimiento de varios niños en una misma fórmula, empezando por el ``el niño $1$ no sabe si el niño $2$ sabe'' con el que abríamos la sección. Queda por tanto fuera del lenguaje con el que estamos trabajando, igual que ocurría con el anuncio de la observación \ref{obs:anuncio}, y por eso lo hemos discutido de manera informal, sobre el dibujo del cubo, en lugar de escribirlo como fórmulas. Es la consecuencia de no usar un modelo multiagente, que es lo habitual en el tratamiento de estos problemas, como comentamos en la sección \ref{sec:epistemica}.
+Todo este razonamiento mezcla el conocimiento de varios niños en una misma fórmula, empezando por el ``el niño $1$ no sabe si el niño $2$ sabe'' con el que abríamos la sección. Queda por tanto fuera del lenguaje con el que estamos trabajando, igual que ocurría con el anuncio de la observación \ref{obs:anuncio}, y por eso lo hemos discutido de manera informal, sobre el dibujo del cubo, en lugar de escribirlo como fórmulas. Es la consecuencia de no usar un modelo multiagente, que es lo habitual en el tratamiento de estos problemas, como comentamos en la sección \ref{sec:epistemica}.
 
-\section{\emph{Muddy children} en Lean}\label{sec:muddy-lean}
-
-Pongo AAA pero realmente no va a pasar, ya llego demasiado tarde y lo poco que tengo de código Lean de esto no es suficiente para terminar de dejarlo bien en 2 días. Lo más seguro es que lo añada al repositorio (si eso) y lo deje comentado en las conclusiones.
+En realidad, esta es la razón de que este capítulo se haya escrito y modelizado en este lenguaje aunque el acertijo no lo exija y pueda ``resolverse'' informalmente. ``El niño $1$ imagina que el niño $2$ podría imaginar\dots'' no es algo que se pueda escribir en un asistente de demostración. Un conjunto de mundos, una relación y una recursión sobre fórmulas, sí y son exactamente los objetos que el capítulo \ref{sec:formalizacion} ya tiene definidos y verificados en Lean. La modelización de este capítulo deja el acertijo a un paso de ser código, con la salvedad de que ese paso no se ha dado en este trabajo, por las razones que se comentan en el capítulo \ref{sec:conclusiones}.
