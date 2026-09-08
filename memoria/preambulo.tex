@@ -108,6 +108,11 @@
 }
 
 \lstnewenvironment{leansnippet}{\lstset{numbers=none}}{}
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{lstlisting}{\par\noindent\begin{minipage}{\linewidth}}
+\AfterEndEnvironment{lstlisting}{\end{minipage}\par}
+\BeforeBeginEnvironment{leansnippet}{\par\noindent\begin{minipage}{\linewidth}}
+\AfterEndEnvironment{leansnippet}{\end{minipage}\par}
 \newcommand{\tactica}[1]{\paragraph{#1.}}
 
 % --- Símbolos Unicode utilizables en modo texto (para \lean y la prosa) ---

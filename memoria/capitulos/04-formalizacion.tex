@@ -80,7 +80,7 @@ Nombre & Enunciado & Dónde se usa \\
 \lean{taut_iff_intro} & $(\varphi \limp \psi) \limp (\psi \limp \varphi)$ \newline $\limp (\varphi \leftrightarrow \psi)$ & regla RE \\
 \bottomrule
 \end{tabular}
-\caption{Las ocho tautologías clásicas demostradas y el lugar donde se emplean. Las tres primeras son la identidad y los axiomas A1 y A2 de Hilbert, que el teorema de la deduccion \ref{prop:deduccion} necesita.}
+\caption{Las ocho tautologías clásicas demostradas y el lugar donde se emplean. Las tres primeras son la identidad y los axiomas A1 y A2 de Hilbert, que el teorema de la deducción \ref{prop:deduccion} necesita.}
 \label{tab:tautologias}
 \end{table}
 
@@ -131,7 +131,7 @@ inductive Provable : ModalFormula VP → Prop where
   | nec {φ : ModalFormula VP} (h : Provable φ) : Provable (□φ)
 \end{lstlisting}
 
-Esto es el uso de los tipos inductivos anunciado en la sección \ref{sec:tipos-inductivos}. \lean{Provable} es una familia de proposiciones indexada por fórmulas, y un término de tipo \lean{Provable φ} es un árbol finito de aplicaciones de axiomas y reglas, es decir, una derivación en $\K$. De ahí salen a la vez las cuatro reglas como constructores y el principio de inducción sobre derivaciones, que es lo que hace que la corrección, más adelante, quepa en cuatro líneas. Los tres teoremas \lean{provable_iff_mp}, \lean{provable_iff_mpr} y \lean{provable_iff_intro}, de una línea cada uno, se limitan a convertir teoremas de $\K$ las tautologías del bicondicional mediante \lean{Provable.cpl}.
+Esto es el uso de los tipos inductivos anunciado en la sección \ref{sec:tipos-inductivos}. \lean{Provable} es una familia de proposiciones indexada por fórmulas, y un término de tipo \lean{Provable φ} es un árbol finito de aplicaciones de axiomas y reglas, es decir, una derivación en $\K$. De ahí salen a la vez las cuatro reglas como constructores y el principio de inducción sobre derivaciones, que es lo que hace que la corrección, más adelante, quepa en cuatro líneas. Los tres teoremas \lean{provable_iff_mp}, \lean{provable_iff_mpr} y \lean{provable_iff_intro}, de una línea cada uno, se limitan a convertir en teoremas de $\K$ las tautologías del bicondicional mediante \lean{Provable.cpl}.
 
 Las proposiciones \ref{prop:rm} y \ref{prop:re} muestran el parecido entre una demostración en papel y una en Lean:
 
@@ -403,7 +403,8 @@ theorem mcs_mem_of_deducible {Γ : Set (ModalFormula VP)}
     have himp : DeducibleFrom Γ (φ ⟶ ModalFormula.bot) := deduction_theorem hbot
     exact hΓ.1 (DeducibleFrom.mp himp h)
   -- Por maximalidad (hΓ.2), insert φ Γ ⊆ Γ. En Mathlib un ⊆ es una función de
-  -- pertenencias, así que se aplica a φ ∈ insert φ Γ y devuelve φ ∈ Γ(Set.mem_insert φ Γ)
+  -- pertenencias, así que se aplica a φ ∈ insert φ Γ y devuelve φ ∈ Γ
+  exact hΓ.2 (insert φ Γ) hcons (Set.subset_insert φ Γ) (Set.mem_insert φ Γ)
 \end{lstlisting}
 
 Junto con el constructor \lean{DeducibleFrom.mem}, que da la implicación recíproca, este lema establece que para un MCS pertenecer y ser deducible son la misma cosa que es lo que permite tratarlo como una valoración. Las otras dos propiedades siguen el mismo patrón y sus enunciados son
@@ -422,7 +423,7 @@ El tercero es el que usará el lema de verdad. Su demostración emplea las dos t
 
 \subsection{El lema de Lindenbaum, vía Zorn}\label{subsec:comp-lind}
 
-Como decíamos en la sección \ref{sec:sintaxis-mat} demostración no procede de \cite{blackburn}, que sigue la vía de la enumeración, sino que es la aplicación estándar del lema de Zorn a la familia de los conjuntos consistentes; la hemos redactado a la medida de la versión que ofrece Mathlib (sección \ref{sec:mathlib}), y de ahí la hipótesis de que las cadenas sean no vacías, que en papel suele omitirse.
+Como decíamos en la sección \ref{sec:sintaxis-mat}, esta demostración no procede de \cite{blackburn}, que sigue la vía de la enumeración, sino que es la aplicación estándar del lema de Zorn a la familia de los conjuntos consistentes; la hemos redactado a la medida de la versión que ofrece Mathlib (sección \ref{sec:mathlib}), y de ahí la hipótesis de que las cadenas sean no vacías, que en papel suele omitirse.
 
 Aplicar Zorn exige comprobar que la unión de una cadena de conjuntos consistentes es consistente. En papel el argumento es una frase: ``si $\bigcup \mathcal{C} \proves \bot$, entonces, como toda deducción usa un número finito de hipótesis y $\mathcal{C}$ está totalmente ordenada por inclusión, todas ellas caben en un mismo eslabón''. Esa frase esconde un hecho que hay que demostrar, que nosotros debemos aislar como lema previo:
 
@@ -478,7 +479,7 @@ La demostración tiene tres partes. La primera es el \lean{have hchains} de la l
 
 La segunda parte es la llamada a Zorn (línea 13), que devuelve un conjunto \lean{Δ} que contiene a \lean{Γ} y es maximal dentro de la familia.
 
-La tercera comprueba que ese \lean{Δ} es lo que buscábamos, y es donde se aprovecha la forma en que definimos \lean{MaximalConsistent} en la subsección \ref{subsec:comp-cons}. El predicado \lean{Maximal} de Mathlib es una conjunción de dos afirmaciones: que \lean{Δ} pertenece a la familia, es decir, que es consistente, y que cualquier conjunto consistente que lo contenga está contenido en él. las dos que pide nuestra definición, de modo que la primera se entrega tal cual con \lean{hΔmax.1}. La segunda necesita un \lean{intro} y un \lean{exact} por un motivo técnico, que Mathlib deja implícito el conjunto cuantificado y nosotros lo escribimos explícito.
+La tercera comprueba que ese \lean{Δ} es lo que buscábamos, y es donde se aprovecha la forma en que definimos \lean{MaximalConsistent} en la subsección \ref{subsec:comp-cons}. El predicado \lean{Maximal} de Mathlib es una conjunción de dos afirmaciones: que \lean{Δ} pertenece a la familia, es decir, que es consistente, y que cualquier conjunto consistente que lo contenga está contenido en él. Son las dos que pide nuestra definición, de modo que la primera se entrega tal cual con \lean{hΔmax.1}. La segunda necesita un \lean{intro} y un \lean{exact} por un motivo técnico, que Mathlib deja implícito el conjunto cuantificado y nosotros lo escribimos explícito.
 
 \subsection{El modelo canónico y el lema de encajonado}\label{subsec:comp-mod}
 
@@ -609,6 +610,6 @@ theorem provable_iff_valid (φ : ModalFormula VP) : Provable φ ↔ Valid φ :=
   ⟨soundness, completeness⟩
 \end{leansnippet}
 
-Si leemos el enunciado con calma vemos que, a la izquierda tenemos un tipo inductivo cuyos términos son árboles de derivación construidos con cuatro reglas; a la derecha, una cuantificación sobre todos los modelos de Kripke, todos los mundos y todas las valoraciones. Son dos objetos sin ningún parecido, y el teorema afirma que tienen exactamente los mismos elementos. Que Lean lo haya verificado significa que entre las dos definiciones no quedan pasos sin justificar, ni analogías, ni casos omitido por simetría.
+Si leemos el enunciado con calma vemos que, a la izquierda tenemos un tipo inductivo cuyos términos son árboles de derivación construidos con cuatro reglas; a la derecha, una cuantificación sobre todos los modelos de Kripke, todos los mundos y todas las valoraciones. Son dos objetos sin ningún parecido, y el teorema afirma que tienen exactamente los mismos elementos. Que Lean lo haya verificado significa que entre las dos definiciones no quedan pasos sin justificar, ni analogías, ni casos omitidos por simetría.
 
-Queda una observación sobre lo que el teorema \emph{no} dice. Lo demostrado es la completitud \emph{débil}, esto es, que toda fórmula válida es demostrable. La versión \emph{fuerte}, que es la que establece \cite[Teorema~4.23]{blackburn} y que recordábamos en la sección \ref{sec:mapa-completitud}, admite además partir de premisas. Si $\varphi$ es consecuencia semántica de un conjunto $\Sigma$ de fórmulas, entonces $\Sigma \proves \varphi$. Nuestro teorema es el caso $\Sigma = \emptyset$. La versión fuerte no exige rehacer nada, simlemente usa el mismo modelo canónico y los mismos lemas. Falta definir la consecuencia semántica y comprobar que el MCS que Lindenbaum construye a partir de $\Sigma$ satisface todas sus fórmulas. La infraestructura está construida, y en el capítulo \ref{sec:conclusiones} esto se recoge entre las continuaciones naturales del trabajo.
+Queda una observación sobre lo que el teorema \emph{no} dice. Lo demostrado es la completitud \emph{débil}, esto es, que toda fórmula válida es demostrable. La versión \emph{fuerte}, que es la que establece \cite[Teorema~4.23]{blackburn} y que recordábamos en la sección \ref{sec:mapa-completitud}, admite además partir de premisas. Si $\varphi$ es consecuencia semántica de un conjunto $\Sigma$ de fórmulas, entonces $\Sigma \proves \varphi$. Nuestro teorema es el caso $\Sigma = \emptyset$. La versión fuerte no exige rehacer nada, simplemente usa el mismo modelo canónico y los mismos lemas. Falta definir la consecuencia semántica y comprobar que el MCS que Lindenbaum construye a partir de $\Sigma$ satisface todas sus fórmulas. La infraestructura está construida, y en el capítulo \ref{sec:conclusiones} esto se recoge entre las continuaciones naturales del trabajo.
